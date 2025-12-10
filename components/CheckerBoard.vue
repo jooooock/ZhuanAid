@@ -18,8 +18,9 @@
         <code
           v-if="cell !== 0 && settingStore.showCellValue"
           class="absolute z-20 right-0 top-0 w-5 text-center text-white bg-black/80 p-[2px] text-xs"
-          >{{ cell }}</code
         >
+          {{ cell }}
+        </code>
       </div>
 
       <!-- 右侧行序号 -->

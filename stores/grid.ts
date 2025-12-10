@@ -27,4 +27,16 @@ export const useGridStore = defineStore('grid', {
       [9, 35, 19, 29, 17, 0, 27, 0, 0, 0],
     ],
   }),
+  getters: {
+    gridIsEmpty(): boolean {
+      for (const row of this.grid) {
+        for (const cell of row) {
+          if (cell !== 0) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+  },
 });

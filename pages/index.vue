@@ -65,7 +65,8 @@
 import MaterialLibrary from '~/components/MaterialLibrary.vue';
 import useBoard from '~/composables/useBoard';
 import { websiteName } from '~/config';
-import { CheckerBoard, type EffectiveMove, type PointGroup } from '~/utils/CheckerBoard';
+import type { EffectiveMove, PointGroup } from '~/types/board';
+import { Board } from '~/utils/Board';
 
 const { loading, phase, parse: parseBoard, renderFrame } = useBoard();
 
@@ -102,7 +103,7 @@ async function processBoard() {
 }
 
 async function findAllEliminate() {
-  const board = new CheckerBoard(grid.value!);
+  const board = new Board(grid.value!);
   const eliminates = board.findAllEliminate();
   for (const item of eliminates) {
     await renderFrame(item.point1, item.point2, rows.value, cols.value, file.value!);
@@ -116,7 +117,7 @@ async function magic() {
 
   effectiveMoves.value = [];
 
-  const board = new CheckerBoard(grid.value!);
+  const board = new Board(grid.value!);
   const moves = board.findAllPossibleMoves();
 
   let result: EffectiveMove[] = [];

@@ -1,9 +1,4 @@
-export type DirName = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
-interface DirObj {
-  dr: number;
-  dc: number;
-  name: DirName;
-}
+import type { DirName, DirObj, EffectiveMove, Eliminate, Move, Point, PointGroup } from '~/types/board';
 
 export const DIR: Record<DirName, DirObj> = {
   UP: { dr: -1, dc: 0, name: 'UP' },
@@ -12,31 +7,7 @@ export const DIR: Record<DirName, DirObj> = {
   RIGHT: { dr: 0, dc: 1, name: 'RIGHT' },
 };
 
-interface Point {
-  r: number;
-  c: number;
-}
-
-interface Eliminate {
-  point1: Point;
-  point2: Point;
-  value: number;
-}
-
-export interface PointGroup {
-  start: Point;
-  end: Point;
-}
-
-interface Move {
-  dir: DirObj;
-  distance: number;
-  group: PointGroup;
-}
-
-export interface EffectiveMove extends Move, Eliminate {}
-
-export class CheckerBoard {
+export class Board {
   grid: number[][];
   rows: number;
   cols: number;
@@ -49,7 +20,7 @@ export class CheckerBoard {
 
   // 复制棋盘
   clone() {
-    return new CheckerBoard(this.grid);
+    return new Board(this.grid);
   }
 
   // 坐标是否在棋盘内
@@ -245,7 +216,7 @@ export class CheckerBoard {
 
     for (let step = 1; step <= distance; step++) {
       const [board, range] = this.slide(group, dir, step);
-      const eliminates = new CheckerBoard(board).findAllEliminate();
+      const eliminates = new Board(board).findAllEliminate();
       for (const eliminate of eliminates) {
         if (this.inRange(eliminate, range)) {
           effectiveMoves.push({ ...move, distance: step, ...eliminate });
