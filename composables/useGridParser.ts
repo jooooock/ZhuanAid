@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs';
 import { NUM_CLASSES } from '~/config';
+import { useSettingStore } from '~/stores/setting';
 import { cosineSimilarity, loadImage } from '~/utils/helper';
 
 const MODEL_URL = 'https://www.kaggle.com/models/google/mobilenet-v2/TfJs/035-128-feature-vector/3';
@@ -49,12 +50,12 @@ interface BoardParseOptions {
   rows: number;
   cols: number;
   file: File;
-  x?: number;
-  y?: number;
 }
 
 // 解析棋盘
-async function parseBoard({ rows, cols, file, x: targetX, y: targetY }: BoardParseOptions, phase: Ref<string>) {
+async function parseBoard({ rows, cols, file }: BoardParseOptions, phase: Ref<string>) {
+  console.log(rows, cols, file);
+
   // 加载原型（只需一次）
   if (prototypes.length === 0) {
     await loadPrototypes(phase);
@@ -75,7 +76,7 @@ async function parseBoard({ rows, cols, file, x: targetX, y: targetY }: BoardPar
   }
   canvas.width = displayWidth + 30 * 2; // 两边需要加上行列序号
   canvas.height = displayHeight + 30 * 2; // 上下也需要加上行列序号
-  canvas.style.display = 'block';
+  // canvas.style.display = 'block';
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(img, 30, 30, displayWidth, displayHeight);
 
@@ -83,29 +84,6 @@ async function parseBoard({ rows, cols, file, x: targetX, y: targetY }: BoardPar
   const cellWidth = displayWidth / cols;
   const cellHeight = displayHeight / rows;
   const cellSize = Math.min(cellWidth, cellHeight);
-
-  // 绘制行列序号
-  for (let i = 0; i < rows; i++) {
-    ctx.save(); // 保存上下文
-    const fontSize = 14;
-    ctx.font = `${fontSize}px monospace`;
-    ctx.fillStyle = '#857979';
-    ctx.textAlign = 'right';
-    ctx.fillText((i + 1).toString(), 24, 30 + i * cellHeight + cellHeight / 2 + 5);
-    ctx.textAlign = 'left';
-    ctx.fillText((i + 1).toString(), 30 + displayWidth + 10, 30 + i * cellHeight + cellHeight / 2 + 5);
-    ctx.restore(); // 恢复上下文
-  }
-  for (let i = 0; i < cols; i++) {
-    ctx.save(); // 保存上下文
-    const fontSize = 14;
-    ctx.font = `${fontSize}px monospace`;
-    ctx.fillStyle = '#857979';
-    ctx.textAlign = 'center';
-    ctx.fillText((i + 1).toString(), 30 + i * cellWidth + cellWidth / 2, 20);
-    ctx.fillText((i + 1).toString(), 30 + i * cellWidth + cellWidth / 2, 30 + displayHeight + 20);
-    ctx.restore(); // 恢复上下文
-  }
 
   // 提取网格
   const grid: number[][] = [];
@@ -156,40 +134,7 @@ async function parseBoard({ rows, cols, file, x: targetX, y: targetY }: BoardPar
         );
       }
 
-      if (row === targetX && col === targetY) {
-        console.log(simArray);
-      }
       grid[row][col] = bestClass;
-
-      // 绘制标注：添加背景色+内边距，右上角
-      if (bestClass !== -1 && bestClass !== 0) {
-        const text = bestClass.toString();
-        const fontSize = 12;
-        const padding = 4; // 内边距
-
-        ctx.save(); // 保存上下文
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.textAlign = 'right'; // 右对齐
-        const textMetrics = ctx.measureText(text);
-        const textWidth = textMetrics.width;
-        const textHeight = fontSize + 2; // 约字体高度
-
-        // 背景矩形：右上角位置
-        const bgX = x + cellWidth; // 右边起始
-        const bgY = y; // 上边起始
-        const bgWidth = textWidth + 2 * padding;
-        const bgHeight = textHeight + padding;
-
-        // 填充半透明黑色背景
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(bgX - bgWidth, bgY, bgWidth, bgHeight);
-
-        // 绘制红色粗体文字（居中于背景）
-        ctx.fillStyle = 'white';
-        ctx.fillText(text, bgX - padding, bgY + textHeight); // y偏移到背景内
-
-        ctx.restore(); // 恢复上下文
-      }
 
       tensor.dispose();
       output.dispose();
@@ -200,75 +145,16 @@ async function parseBoard({ rows, cols, file, x: targetX, y: targetY }: BoardPar
   return grid;
 }
 
-interface Point {
-  r: number;
-  c: number;
-}
-async function renderFrame(start: Point, end: Point, rows: number, cols: number, file: File) {
-  const img = await loadImage(URL.createObjectURL(file));
-  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-  const ctx = canvas.getContext('2d')!;
-
-  const aspectRatio = img.width / img.height;
-  const maxWidth = 1200;
-  let displayWidth = Math.min(img.width, maxWidth);
-  let displayHeight = displayWidth / aspectRatio;
-  if (displayHeight > 800) {
-    displayHeight = 800;
-    displayWidth = displayHeight * aspectRatio;
-  }
-
-  // 动态计算每个格子大小
-  const cellWidth = displayWidth / cols;
-  const cellHeight = displayHeight / rows;
-  const cellSize = Math.min(cellWidth, cellHeight);
-
-  // 确定左上角和右下角
-  const x1 = 30 + start.c * cellWidth + cellWidth / 2;
-  const y1 = 30 + start.r * cellHeight + cellHeight / 2;
-  const cropX1 = Math.max(0, x1 + (cellWidth - cellSize) / 2);
-  const cropY1 = Math.max(0, y1 + (cellHeight - cellSize) / 2);
-  const x2 = 30 + end.c * cellWidth + cellWidth / 2;
-  const y2 = 30 + end.r * cellHeight + cellHeight / 2;
-  const cropX2 = Math.max(0, x2 + (cellWidth - cellSize) / 2);
-  const cropY2 = Math.max(0, y2 + (cellHeight - cellSize) / 2);
-
-  const minX = Math.min(cropX1, cropX2);
-  const minY = Math.min(cropY1, cropY2);
-  const maxX = Math.max(cropX1, cropX2);
-  const maxY = Math.max(cropY1, cropY2);
-
-  const innerLineWidth = 4;
-  const outerLineWidth = 6;
-  // 计算白色外边框边界
-  const whiteMinX = Math.max(0, minX - innerLineWidth); // 防止超出 Canvas 左边界
-  const whiteMinY = Math.max(0, minY - innerLineWidth); // 防止超出 Canvas 上边界
-  const whiteMaxX = Math.min(canvas.width, maxX + innerLineWidth); // 防止超出 Canvas 右边界
-  const whiteMaxY = Math.min(canvas.height, maxY + innerLineWidth); // 防止超出 Canvas 下边界
-  const whiteWidth = whiteMaxX - whiteMinX;
-  const whiteHeight = whiteMaxY - whiteMinY;
-
-  // 先绘制外边框
-  ctx.lineWidth = innerLineWidth;
-  ctx.strokeStyle = 'black';
-  ctx.lineJoin = 'round';
-  ctx.strokeRect(whiteMinX, whiteMinY, whiteWidth, whiteHeight);
-
-  // 然后绘制内线框
-  ctx.lineWidth = outerLineWidth;
-  ctx.strokeStyle = '#22c55e';
-  ctx.lineJoin = 'round';
-  ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
-}
-
 export default () => {
+  const settingStore = useSettingStore();
+
   const loading = ref(false);
   const phase = ref('');
 
-  async function parse(options: BoardParseOptions) {
+  async function parse(file: File) {
     try {
       loading.value = true;
-      return await parseBoard(options, phase);
+      return await parseBoard({ file, rows: settingStore.rows, cols: settingStore.cols }, phase);
     } finally {
       loading.value = false;
     }
@@ -278,6 +164,5 @@ export default () => {
     loading,
     phase,
     parse,
-    renderFrame,
   };
 };

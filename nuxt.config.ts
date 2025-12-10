@@ -4,6 +4,6 @@ export default defineNuxtConfig({
   devtools: {
     enabled: false,
   },
-  modules: ['@vueuse/nuxt', '@nuxt/ui'],
+  modules: ['@vueuse/nuxt', '@nuxt/ui', '@pinia/nuxt'],
   ssr: false,
 });

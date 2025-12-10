@@ -2,7 +2,6 @@
 import { NUM_CLASSES } from '~/config';
 
 const total = NUM_CLASSES - 1;
-const openDialog = ref(false);
 
 // 每个素材: 40
 // 间隙: 4
@@ -12,15 +11,11 @@ const openDialog = ref(false);
 </script>
 
 <template>
-  <div class="absolute right-2 top-2 max-w-[348px] bg-white">
-    <div class="flex justify-end mb-3">
-      <UButton size="xs" :icon="openDialog ? 'i-lucide:eye' : 'i-lucide:eye-off'" @click="openDialog = !openDialog">
-        素材库
-      </UButton>
-    </div>
-    <div class="flex flex-wrap gap-1" v-show="openDialog">
+  <div class="border my-3 px-5 py-3 rounded-md">
+    <h2 class="text-xl font-bold mb-3">素材库</h2>
+    <div class="flex flex-wrap gap-1">
       <div v-for="i in total" class="flex flex-col items-center">
-        <img :src="'/icons/' + i + '.png'" class="size-10 border border-black" alt="" />
+        <img :src="'/icons/' + i + '.png'" class="size-10 border border-gray-300" alt="" />
         <span class="text-sm text-gray-500">{{ i }}</span>
       </div>
     </div>

@@ -23,7 +23,7 @@
       <UButton @click="processBoard" :loading="loading" :disabled="!file" class="disabled:bg-gray-400">
         {{ phase || '重置棋盘' }}
       </UButton>
-      <UButton :disabled="!grid" class="disabled:bg-gray-400" @click="magic">magic</UButton>
+      <UButton :disabled="!grid" class="disabled:bg-gray-400" @click="magic">发动魔法</UButton>
     </div>
     <div class="flex justify-between">
       <canvas id="canvas" class="mt-3 w-[565px] h-[800px] bg-gray-200"></canvas>
@@ -64,12 +64,13 @@
 <script setup lang="ts">
 import MaterialLibrary from '~/components/MaterialLibrary.vue';
 import useBoard from '~/composables/useBoard';
+import { websiteName } from '~/config';
 import { CheckerBoard, type EffectiveMove, type PointGroup } from '~/utils/CheckerBoard';
 
 const { loading, phase, parse: parseBoard, renderFrame } = useBoard();
 
 useHead({
-  title: '棋盘图标识别',
+  title: websiteName,
 });
 
 const rows = ref(14);
