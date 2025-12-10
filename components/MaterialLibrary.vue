@@ -1,15 +1,3 @@
-<script setup lang="ts">
-import { NUM_CLASSES } from '~/config';
-
-const total = NUM_CLASSES - 1;
-
-// 每个素材: 40
-// 间隙: 4
-
-// 一行显示8个素材
-// 40x8 + 4x7 = 320 + 28 = 348
-</script>
-
 <template>
   <div class="border my-3 px-5 py-3 rounded-md">
     <h2 class="text-xl font-bold mb-3">素材库</h2>
@@ -21,3 +9,15 @@ const total = NUM_CLASSES - 1;
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { NUM_CLASSES } from '~/config';
+
+const total = NUM_CLASSES - 1;
+
+// 每个素材: 40
+// 间隙: 4
+
+// 一行显示8个素材
+// 40x8 + 4x7 = 320 + 28 = 348
+</script>

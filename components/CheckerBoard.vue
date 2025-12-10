@@ -1,9 +1,9 @@
 <template>
-  <div class="checker-board w-fit flex flex-col mx-auto relative mt-10 border shadow-md">
+  <div class="w-fit flex flex-col relative border rounded-md shadow-md">
     <!-- 顶部列序号 -->
     <BoardColNo :cols="cols" position="top" />
 
-    <div v-for="(row, idx) in grid" :key="idx" class="row flex">
+    <div v-for="(row, idx) in grid" :key="idx" class="flex">
       <!-- 左侧行序号 -->
       <BoardRowNo :index="idx" position="left" />
 
@@ -11,7 +11,7 @@
       <div
         v-for="(cell, idx2) in row"
         :key="idx2"
-        class="cell relative z-0 size-10 ring-green-500 transition"
+        class="relative z-0 size-10 ring-green-500 transition"
         :class="cellDivCls(cell)"
       >
         <img :src="'/icons/' + cell + '.png'" class="size-10" :class="cellImageCls(cell)" alt="" />
