@@ -1,0 +1,15 @@
+body {
+    overscroll-behavior: none; /* 阻止滚动到页面边缘的效果 */
+}
+::selection {
+    background-color: yellow;
+    color: black;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}

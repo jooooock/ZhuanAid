@@ -1,0 +1,38 @@
+{
+  "name": "zhuan-aid",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "repository": "git@github.com:jooooock/ZhuanAid.git",
+  "author": "jock",
+  "license": "UNLICENSED",
+  "scripts": {
+    "debug": "nuxt dev --inspect",
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "NITRO_PRESET=cloudflare_pages nuxt build && npx wrangler --cwd dist pages dev",
+    "format": "biome check --write",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^2.17.0",
+    "@nuxtjs/tailwindcss": "^6.12.0",
+    "@tensorflow/tfjs": "^4.22.0",
+    "@vueuse/components": "^10.11.0",
+    "@vueuse/core": "^10.11.0",
+    "@vueuse/nuxt": "^10.11.0",
+    "nuxt": "^3.12.3",
+    "uuid": "^11.0.3",
+    "vue": "^3.5.22"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.8",
+    "prettier": "^3.5.2",
+    "tailwindcss-debug-screens": "^2.2.1",
+    "typescript": "^5.5.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+}
