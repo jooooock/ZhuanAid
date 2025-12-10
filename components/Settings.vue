@@ -10,7 +10,7 @@
 
         <div class="h-[calc(100vh-121px)] overflow-y-scroll">
           <div class="space-y-3 my-3 border rounded-md p-3">
-            <h2 class="text-xl">提取棋盘数据</h2>
+            <h2 class="text-xl text-fuchsia-500">提取棋盘数据</h2>
             <canvas id="canvas" class="hidden"></canvas>
             <div class="flex gap-10">
               <label>
@@ -20,6 +20,18 @@
               <label>
                 <span class="mr-2">棋盘列数:</span>
                 <UInput v-model="settingStore.cols" type="number" min="1" class="w-20 inline-block" />
+              </label>
+            </div>
+            <div class="flex gap-10">
+              <label>
+                <span>选择截图机型:</span>
+                <USelectMenu
+                  class="w-64"
+                  v-model="settingStore.model"
+                  :options="SUPPORTED_MODELS"
+                  option-attribute="name"
+                  value-attribute="id"
+                />
               </label>
             </div>
             <div class="flex gap-10">
@@ -43,14 +55,14 @@
           </div>
 
           <div class="space-y-3 my-3 border rounded-md p-3">
-            <h2 class="text-xl">显示设置</h2>
+            <h2 class="text-xl text-fuchsia-500">显示设置</h2>
             <div class="flex flex-col gap-3">
               <UCheckbox v-model="settingStore.showRowColNumber" label="显示行列号" />
               <UCheckbox v-model="settingStore.showCellValue" label="显示网格值" />
             </div>
           </div>
 
-          <MaterialLibrary class="mt-20" />
+          <MaterialLibrary class="my-3" />
         </div>
       </UCard>
     </USlideover>
@@ -61,6 +73,7 @@
 import useGridParser from '~/composables/useGridParser';
 import { useGridStore } from '~/stores/grid';
 import { useSettingStore } from '~/stores/setting';
+import { SUPPORTED_MODELS } from '~/config';
 
 const { loading, phase, parse: parseBoard } = useGridParser();
 const settingStore = useSettingStore();
@@ -81,6 +94,8 @@ function handleFileChange(files: FileList) {
 async function processBoard() {
   const grid = await parseBoard(file.value!);
   console.log(grid);
-  gridStore.grid = grid;
+  if (grid) {
+    gridStore.grid = grid;
+  }
 }
 </script>

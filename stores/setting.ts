@@ -11,6 +11,9 @@ interface Setting {
 
   // 是否显示网格值
   showCellValue: boolean;
+
+  // 手机型号
+  model: string;
 }
 
 export const useSettingStore = defineStore('setting', {
@@ -19,5 +22,6 @@ export const useSettingStore = defineStore('setting', {
     cols: 10,
     showRowColNumber: false,
     showCellValue: false,
+    model: 'iphone-11-pro',
   }),
 });

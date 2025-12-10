@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
-import { NUM_CLASSES } from '~/config';
+import { NUM_CLASSES, SUPPORTED_MODELS } from '~/config';
 import { useSettingStore } from '~/stores/setting';
-import { cosineSimilarity, loadImage } from '~/utils/helper';
+import { cosineSimilarity, cropImage, loadImage } from '~/utils/helper';
 
 const MODEL_URL = 'https://www.kaggle.com/models/google/mobilenet-v2/TfJs/035-128-feature-vector/3';
 const INPUT_NAME = 'images'; // 模型输入键
@@ -152,12 +152,26 @@ export default () => {
   const phase = ref('');
 
   async function parse(file: File) {
+    // 裁剪图片
+    const targetModel = SUPPORTED_MODELS.find(model => model.id === settingStore.model);
+    if (!targetModel) {
+      console.warn('未找到指定的手机型号');
+      return null;
+    }
+
     try {
       loading.value = true;
-      return await parseBoard({ file, rows: settingStore.rows, cols: settingStore.cols }, phase);
+
+      const f = await cropImage(file, targetModel.x1, targetModel.y1, targetModel.x2, targetModel.y2);
+      console.log(f);
+
+      return await parseBoard({ file: f, rows: settingStore.rows, cols: settingStore.cols }, phase);
+    } catch (e) {
+      console.error(e);
     } finally {
       loading.value = false;
     }
+    return null;
   }
 
   return {
