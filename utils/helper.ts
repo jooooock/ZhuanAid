@@ -1,4 +1,6 @@
 // 余弦相似度
+import type { TileArea } from '~/types/board';
+
 export function cosineSimilarity(a: number[], b: number[]) {
   const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
   const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
@@ -71,4 +73,24 @@ export function cropImage(file: File, x1: number, y1: number, x2: number, y2: nu
 
     reader.readAsDataURL(file);
   });
+}
+
+function tileInRange(tile: HTMLElement, area: TileArea): boolean {
+  const r = +tile.dataset.r!;
+  const c = +tile.dataset.c!;
+
+  return r >= area.start.r && r <= area.end.r && c >= area.start.c && c <= area.end.c;
+}
+
+export function highlight(area: TileArea) {
+  console.log(area);
+  const tiles = document.querySelectorAll<HTMLElement>('.tile');
+  for (const tile of tiles) {
+    if (tileInRange(tile, area)) {
+      tile.classList.add('animate-skin');
+      setTimeout(() => {
+        tile.classList.remove('animate-skin');
+      }, 1000);
+    }
+  }
 }

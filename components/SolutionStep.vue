@@ -8,6 +8,7 @@
       class="absolute right-5 top-5 disabled:bg-gray-400"
       @click="emit('magic')"
     ></UButton>
+    <UButton @click="highlight">调试</UButton>
 
     <div class="flex flex-col gap-5 p-10 pr-20">
       <div v-for="(move, idx) in moves" :key="idx" class="p-3 border rounded-md">
@@ -19,7 +20,7 @@
           </code>
         </p>
         <p class="flex items-center">
-          坐标: <code>{{ formatGroupTarget(move.group) }}</code>
+          坐标: <code>{{ formatGroupTarget(move.target) }}</code>
           <UIcon
             @click="locateGroup(move)"
             name="i-lucide:locate-fixed"
@@ -28,7 +29,7 @@
         </p>
         <p class="flex items-center gap-3">
           <UIcon
-            :name="'i-heroicons:arrow-' + move.dir.name.toLowerCase() + '-circle-16-solid'"
+            :name="'i-heroicons:arrow-' + move.direction.name.toLowerCase() + '-circle-16-solid'"
             class="text-green-500 size-10"
           />
           <span class="font-bold font-mono text-3xl text-green-500">{{ move.distance }}</span>
@@ -40,7 +41,8 @@
 
 <script setup lang="ts">
 import { useGridStore } from '~/stores/grid';
-import type { EffectiveMove, PointGroup } from '~/types/board';
+import type { DirectedTileGroup, EffectiveMove, TileArea } from '~/types/board';
+import { highlight } from '~/utils/helper';
 
 interface Props {
   moves: EffectiveMove[];
@@ -50,7 +52,7 @@ const emit = defineEmits(['magic', 'locate']);
 
 const gridStore = useGridStore();
 
-function formatGroupTarget(block: PointGroup) {
+function formatGroupTarget(block: DirectedTileGroup) {
   let target = '';
   const { start, end } = block;
   if (start.r === end.r && start.c === end.c) {
@@ -72,9 +74,13 @@ function formatGroupTarget(block: PointGroup) {
 }
 
 function locateGroup(move: EffectiveMove) {
-  const { group: block } = move;
-  const { start, end } = block;
-  // renderFrame(start, end, rows.value, cols.value, file.value!);
-  emit('locate', toRaw(block));
+  const target = toRaw(move.target);
+  let area: TileArea = { start: target.start, end: target.end };
+  if (target.direction.name === 'LEFT') {
+    area = { start: target.end, end: target.start };
+  } else if (target.direction.name === 'UP') {
+    area = { start: target.end, end: target.start };
+  }
+  highlight(area);
 }
 </script>

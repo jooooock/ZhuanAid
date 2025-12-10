@@ -1,6 +1,7 @@
 body {
     overscroll-behavior: none; /* 阻止滚动到页面边缘的效果 */
 }
+
 ::selection {
     background-color: yellow;
     color: black;
@@ -9,7 +10,18 @@ body {
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
+
 .no-scrollbar {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+}
+
+@keyframes skin {
+    50% {
+        opacity: 0.1;
+    }
+}
+
+.animate-skin {
+    animation: skin 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

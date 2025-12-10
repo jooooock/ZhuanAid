@@ -3,16 +3,19 @@
     <!-- 顶部列序号 -->
     <BoardColNo :cols="cols" position="top" />
 
-    <div v-for="(row, idx) in grid" :key="idx" class="flex">
+    <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="flex">
       <!-- 左侧行序号 -->
-      <BoardRowNo :index="idx" position="left" />
+      <BoardRowNo :index="rowIndex" position="left" />
 
       <!-- 格子区 -->
       <div
-        v-for="(cell, idx2) in row"
-        :key="idx2"
-        class="relative z-0 size-10 ring-green-500 transition"
+        v-for="(cell, colIndex) in row"
+        :key="colIndex"
+        class="tile relative z-0 size-10 ring-green-500 transition"
         :class="cellDivCls(cell)"
+        :data-r="rowIndex"
+        :data-c="colIndex"
+        @click="debug(rowIndex, colIndex)"
       >
         <img :src="'/icons/' + cell + '.png'" class="size-10" :class="cellImageCls(cell)" alt="" />
         <code
@@ -24,7 +27,7 @@
       </div>
 
       <!-- 右侧行序号 -->
-      <BoardRowNo :index="idx" position="right" />
+      <BoardRowNo :index="rowIndex" position="right" />
     </div>
 
     <!-- 底部列序号 -->
@@ -53,5 +56,9 @@ function cellImageCls(cell: number) {
 }
 function cellDivCls(cell: number) {
   return cell === 0 ? '' : 'hover:ring-4 hover:cursor-pointer hover:z-10 hover:scale-110';
+}
+
+function debug(r: number, c: number) {
+  console.log(`(${r}, ${c})`);
 }
 </script>

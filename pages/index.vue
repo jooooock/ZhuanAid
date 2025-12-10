@@ -16,7 +16,7 @@ import CheckerBoard from '~/components/CheckerBoard.vue';
 import SolutionStep from '~/components/SolutionStep.vue';
 import { websiteName } from '~/config';
 import { useGridStore } from '~/stores/grid';
-import type { EffectiveMove, PointGroup } from '~/types/board';
+import type { DirectedTileGroup, EffectiveMove } from '~/types/board';
 import { Board } from '~/utils/Board';
 
 useHead({
@@ -58,7 +58,7 @@ async function magic() {
   effectiveMoves.value = result;
 }
 
-function handleLocate(block: PointGroup) {
+function handleLocate(block: DirectedTileGroup) {
   console.log(block);
 }
 </script>

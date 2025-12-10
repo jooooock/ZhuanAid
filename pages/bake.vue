@@ -65,7 +65,7 @@
 import MaterialLibrary from '~/components/MaterialLibrary.vue';
 import useBoard from '~/composables/useBoard';
 import { websiteName } from '~/config';
-import type { EffectiveMove, PointGroup } from '~/types/board';
+import type { DirectedTileGroup, EffectiveMove } from '~/types/board';
 import { Board } from '~/utils/Board';
 
 const { loading, phase, parse: parseBoard, renderFrame } = useBoard();
@@ -131,7 +131,7 @@ async function magic() {
   effectiveMoves.value = result;
 }
 
-function formatGroupTarget(block: PointGroup) {
+function formatGroupTarget(block: DirectedTileGroup) {
   let target = '';
   const { start, end } = block;
   if (start.r === end.r && start.c === end.c) {
@@ -153,7 +153,7 @@ function formatGroupTarget(block: PointGroup) {
 }
 
 function locateGroup(move: EffectiveMove) {
-  const { group: block } = move;
+  const { target: block } = move;
   const { start, end } = block;
   renderFrame(start, end, rows.value, cols.value, file.value!);
 }

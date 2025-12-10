@@ -1,31 +1,40 @@
-export type DirName = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+export type DirectionName = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
-export interface DirObj {
+export interface Direction {
   dr: number;
   dc: number;
-  name: DirName;
+  name: DirectionName;
 }
 
-export interface Point {
+export interface Coordinate {
   r: number;
   c: number;
 }
 
 export interface Eliminate {
-  point1: Point;
-  point2: Point;
+  point1: Coordinate;
+  point2: Coordinate;
   value: number;
 }
 
-export interface PointGroup {
-  start: Point;
-  end: Point;
+export interface TileGroup {
+  start: Coordinate;
+  end: Coordinate;
+}
+
+export interface DirectedTileGroup extends TileGroup {
+  direction: Direction;
 }
 
 export interface Move {
-  dir: DirObj;
+  direction: Direction;
   distance: number;
-  group: PointGroup;
+  target: DirectedTileGroup;
 }
 
 export interface EffectiveMove extends Move, Eliminate {}
+
+export interface TileArea {
+  start: Coordinate;
+  end: Coordinate;
+}

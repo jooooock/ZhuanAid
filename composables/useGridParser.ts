@@ -152,7 +152,6 @@ export default () => {
   const phase = ref('');
 
   async function parse(file: File) {
-    // 裁剪图片
     const targetModel = SUPPORTED_MODELS.find(model => model.id === settingStore.model);
     if (!targetModel) {
       console.warn('未找到指定的手机型号');
@@ -162,10 +161,9 @@ export default () => {
     try {
       loading.value = true;
 
-      const f = await cropImage(file, targetModel.x1, targetModel.y1, targetModel.x2, targetModel.y2);
-      console.log(f);
-
-      return await parseBoard({ file: f, rows: settingStore.rows, cols: settingStore.cols }, phase);
+      // 裁剪图片
+      const cropFile = await cropImage(file, targetModel.x1, targetModel.y1, targetModel.x2, targetModel.y2);
+      return await parseBoard({ file: cropFile, rows: settingStore.rows, cols: settingStore.cols }, phase);
     } catch (e) {
       console.error(e);
     } finally {

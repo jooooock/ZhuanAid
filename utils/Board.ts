@@ -1,6 +1,14 @@
-import type { DirName, DirObj, EffectiveMove, Eliminate, Move, Point, PointGroup } from '~/types/board';
+import type {
+  Coordinate,
+  DirectedTileGroup,
+  Direction,
+  DirectionName,
+  EffectiveMove,
+  Eliminate,
+  Move,
+} from '~/types/board';
 
-export const DIR: Record<DirName, DirObj> = {
+export const DIRECTION: Record<DirectionName, Direction> = {
   UP: { dr: -1, dc: 0, name: 'UP' },
   DOWN: { dr: 1, dc: 0, name: 'DOWN' },
   LEFT: { dr: 0, dc: -1, name: 'LEFT' },
@@ -23,44 +31,49 @@ export class Board {
     return new Board(this.grid);
   }
 
-  // 坐标是否在棋盘内
-  isValid(p: Point) {
-    return p.r >= 0 && p.r < this.rows && p.c >= 0 && p.c < this.cols;
+  // 查询指定坐标是否在棋盘内
+  inBoard(point: Coordinate) {
+    return point.r >= 0 && point.r < this.rows && point.c >= 0 && point.c < this.cols;
   }
 
-  // 指定位置是否为空
-  isBlank(p: Point) {
-    return this.grid[p.r][p.c] === 0;
-  }
-
-  // 计算两点的距离
-  distance(p1: Point, p2: Point) {
-    if (p1.r !== p2.r && p1.c !== p2.c) {
-      return -1;
+  // 查询指定坐标是否为空
+  isHoleTile(point: Coordinate) {
+    if (!this.inBoard(point)) {
+      throw new Error(`坐标(${point.r}, ${point.c})不在棋盘内`);
     }
+    return this.grid[point.r][point.c] === 0;
+  }
+
+  // 计算两个格子的距离（必须位于同一行/同一列）
+  distance(p1: Coordinate, p2: Coordinate) {
+    if (p1.r !== p2.r && p1.c !== p2.c) {
+      throw new Error(`p1(${p1.r}, ${p1.c}) 和 p2(${p2.r}, ${p2.c}) 不在同一行/同一列，无法计算距离。`);
+    }
+
     const v1 = Math.abs(p2.r - p1.r);
     const v2 = Math.abs(p2.c - p1.c);
     return Math.max(v1, v2);
   }
 
-  reverseDir(dir: DirObj) {
-    switch (dir.name) {
+  // 取反方向
+  reverseDir(direction: Direction) {
+    switch (direction.name) {
       case 'UP':
-        return DIR.DOWN;
+        return DIRECTION.DOWN;
       case 'DOWN':
-        return DIR.UP;
+        return DIRECTION.UP;
       case 'LEFT':
-        return DIR.RIGHT;
+        return DIRECTION.RIGHT;
       case 'RIGHT':
-        return DIR.LEFT;
+        return DIRECTION.LEFT;
       default:
-        throw new Error(`Unrecognized dir "${dir.name}"`);
+        throw new Error(`无效的Direction name: <${direction.name}>`);
     }
   }
 
   // 格子内容是否相等
-  isEqual(p1: Point, p2: Point): boolean {
-    if (!this.isValid(p1) || !this.isValid(p2)) {
+  isEqual(p1: Coordinate, p2: Coordinate): boolean {
+    if (!this.inBoard(p1) || !this.inBoard(p2)) {
       return false;
     }
 
@@ -68,90 +81,94 @@ export class Board {
   }
 
   // 将格子朝指定方向移动一格
-  move(point: Point, dir: DirObj): Point | null {
-    if (!this.isValid(point)) {
+  moveTick(point: Coordinate, dir: Direction): Coordinate | null {
+    if (!this.inBoard(point)) {
       return null;
     }
 
     const p = { ...point };
     p.r += dir.dr;
     p.c += dir.dc;
-    if (!this.isValid(p)) {
+    if (!this.inBoard(p)) {
       return null;
     }
     return p;
   }
 
   // 查找格子在指定方向上的相邻格子，遇到空格跳过
-  findCellSkipBlank(p: Point, dir: DirObj): Point | null {
-    if (!this.isValid(p)) {
+  findNeighborTileSkipBlank(point: Coordinate, dir: Direction): Coordinate | null {
+    if (!this.inBoard(point)) {
       return null;
     }
 
-    const p2 = { ...p };
-    p2.r += dir.dr;
-    p2.c += dir.dc;
-    if (!this.isValid(p2)) {
+    const p = { ...point };
+    p.r += dir.dr;
+    p.c += dir.dc;
+    if (!this.inBoard(p)) {
       return null;
     }
-    if (!this.isBlank(p2)) {
-      return p2;
+    if (!this.isHoleTile(p)) {
+      return p;
     }
 
-    return this.findCellSkipBlank(p2, dir);
+    return this.findNeighborTileSkipBlank(p, dir);
   }
 
-  // 查找格子在指定方向上的最大可移动格子组
-  findCellGroup(blank: Point, dir: DirObj): PointGroup | null {
-    if (!this.isBlank(blank)) {
-      return null;
+  // 查找hole格子在指定方向上最近的最大可移动格子组
+  findTileGroup(hole: Coordinate, direction: Direction): DirectedTileGroup | null {
+    if (!this.isHoleTile(hole)) {
+      throw new Error('参数错误: 该坐标为非 hole 节点');
     }
 
-    const point = { ...blank };
+    const point = { ...hole };
+
     // 跳过开始的空格
     do {
-      point.r += dir.dr;
-      point.c += dir.dc;
-    } while (this.isValid(point) && this.isBlank(point));
-    if (!this.isValid(point)) {
+      point.r += direction.dr;
+      point.c += direction.dc;
+    } while (this.inBoard(point) && this.isHoleTile(point));
+
+    if (!this.inBoard(point)) {
       return null;
     }
 
     const start = { ...point };
     let end = { ...point };
     while (true) {
-      const target = this.move(end, dir);
-      if (target && !this.isBlank(target)) {
+      const target = this.moveTick(end, direction);
+      if (target && !this.isHoleTile(target)) {
         end = target;
       } else {
         break;
       }
     }
 
-    return { start, end };
+    return { start, end, direction };
   }
 
   // 查找所有可移动
-  findAllMoveForBlank(blank: Point): Move[] {
-    if (!this.isBlank(blank)) return [];
+  findAllMoveForHole(hole: Coordinate): Move[] {
+    if (!this.isHoleTile(hole)) {
+      throw new Error('参数错误: 该坐标为非 hole 节点');
+    }
 
     const moves: Move[] = [];
-    for (const dir of Object.values(DIR)) {
-      const group = this.findCellGroup(blank, dir);
-      if (!group) continue;
+    for (const direction of Object.values(DIRECTION)) {
+      const tileGroup = this.findTileGroup(hole, direction);
+      if (!tileGroup) continue;
 
-      const distance = this.distance(group.start, blank);
+      const distance = this.distance(tileGroup.start, hole);
       moves.push({
-        dir: this.reverseDir(dir),
+        direction: this.reverseDir(direction),
         distance: distance,
-        group: group,
+        target: tileGroup,
       });
     }
 
     return moves;
   }
 
-  // 找出棋盘中所有可消除的格子坐标
+  // 找出当前棋盘状态下存在的所有可消除的格子坐标对
   findAllEliminate() {
     const board = this.grid;
     const rows = this.rows;
@@ -160,15 +177,15 @@ export class Board {
     const result: Eliminate[] = [];
 
     // 只检查 DOWN 和 RIGHT 方向，避免重复
-    const checkDirs = [DIR.DOWN, DIR.RIGHT];
+    const checkDirs = [DIRECTION.DOWN, DIRECTION.RIGHT];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const point: Point = { r, c };
+        const point: Coordinate = { r, c };
 
-        if (this.isBlank(point)) continue;
+        if (this.isHoleTile(point)) continue;
 
-        for (const dir of checkDirs) {
-          const point2 = this.findCellSkipBlank(point, dir);
+        for (const direction of checkDirs) {
+          const point2 = this.findNeighborTileSkipBlank(point, direction);
           if (point2 && this.isEqual(point, point2)) {
             result.push({
               value: board[r][c],
@@ -184,38 +201,38 @@ export class Board {
   }
 
   // 找出棋盘中所有的空格坐标
-  findBlankCells() {
-    const blanks: Point[] = [];
+  findHoleTiles() {
+    const tiles: Coordinate[] = [];
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
-        const point: Point = { r, c };
-        if (this.isBlank(point)) {
-          blanks.push(point);
+        const point: Coordinate = { r, c };
+        if (this.isHoleTile(point)) {
+          tiles.push(point);
         }
       }
     }
-    return blanks;
+    return tiles;
   }
 
   // 找出棋盘中所有可能的移动
   findAllPossibleMoves() {
-    const blanks: Point[] = this.findBlankCells();
+    const holes: Coordinate[] = this.findHoleTiles();
     const moves: Move[] = [];
-    for (const point of blanks) {
+    for (const point of holes) {
       // 找出这个空格四个方向上的有效可移动格子组
-      moves.push(...this.findAllMoveForBlank(point));
+      moves.push(...this.findAllMoveForHole(point));
     }
     return moves;
   }
 
   // 评估移动的收益
   evaluate(move: Move) {
-    const { group, dir, distance } = move;
+    const { target, direction, distance } = move;
 
     const effectiveMoves: EffectiveMove[] = [];
 
     for (let step = 1; step <= distance; step++) {
-      const [board, range] = this.slide(group, dir, step);
+      const [board, range] = this.slide(target, direction, step);
       const eliminates = new Board(board).findAllEliminate();
       for (const eliminate of eliminates) {
         if (this.inRange(eliminate, range)) {
@@ -231,14 +248,14 @@ export class Board {
   deduplication(moves: EffectiveMove[]): EffectiveMove[] {
     const map = new Map<string, EffectiveMove>();
     for (const move of moves) {
-      const key = `${move.dir.name}:${move.distance}:${move.value}:${move.point1.r}:${move.point1.c}:${move.point2.r}:${move.point2.r}`;
+      const key = `${move.direction.name}:${move.distance}:${move.value}:${move.point1.r}:${move.point1.c}:${move.point2.r}:${move.point2.r}`;
       map.set(key, move);
     }
     return Array.from(map.values());
   }
 
   // 滑动 group
-  slide(group: PointGroup, dir: DirObj, distance: number): [number[][], PointGroup] {
+  slide(group: DirectedTileGroup, dir: Direction, distance: number): [number[][], DirectedTileGroup] {
     const board = this.clone();
 
     const points = this.getGroupPoints(group);
@@ -250,9 +267,10 @@ export class Board {
 
       board.grid[point.r][point.c] = value;
     }
-    const range: PointGroup = {
+    const range: DirectedTileGroup = {
       start: points[0],
       end: points[points.length - 1],
+      direction: dir,
     };
 
     // 留空的位置改为0
@@ -267,8 +285,8 @@ export class Board {
     return [board.grid, range];
   }
 
-  getGroupPoints(group: PointGroup) {
-    const points: Point[] = [];
+  getGroupPoints(group: DirectedTileGroup) {
+    const points: Coordinate[] = [];
     points.push({ ...group.start });
     if (group.start.r === group.end.r) {
       // 同一行
@@ -300,7 +318,7 @@ export class Board {
     return points;
   }
 
-  inRange(eliminate: Eliminate, range: PointGroup): boolean {
+  inRange(eliminate: Eliminate, range: DirectedTileGroup): boolean {
     const { point1, point2 } = eliminate;
     const isGroupHorizontal = range.start.r === range.end.r;
     if (isGroupHorizontal) {
@@ -316,29 +334,5 @@ export class Board {
         (point2.c === range.start.c && point2.r >= rRange[0] && point2.r <= rRange[1])
       );
     }
-  }
-
-  formatEffectiveMove(move: EffectiveMove) {
-    const { group: block, dir, distance, point1, point2, value } = move;
-
-    const dirMap: Record<DirName, string> = {
-      UP: '上滑',
-      DOWN: '下滑',
-      LEFT: '左滑',
-      RIGHT: '右滑',
-    };
-
-    let target = '';
-    const { start, end } = block;
-    if (start.r === end.r && start.c === end.c) {
-      target = `第 ${start.r + 1} 行 第 ${start.c + 1} 列`;
-    } else if (start.r === end.r) {
-      target = `第 ${start.r + 1} 行 从列 ${start.c + 1} 到 ${end.c + 1} 的连续块`;
-    } else if (start.c === end.c) {
-      target = `第 ${start.c + 1} 列 从行 ${start.r + 1} 到 ${end.r + 1} 的连续块`;
-    }
-    const eliminate = `(${point1.r}, ${point1.c}) - (${point2.r}, ${point2.c})`;
-    console.log('描述:');
-    console.log(`${target} ${dirMap[dir.name]} ${distance} 格，滑动后可消除 ${eliminate}(值为${value})`);
   }
 }

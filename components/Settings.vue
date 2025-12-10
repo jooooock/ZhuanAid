@@ -5,6 +5,7 @@
         <template #header>
           <div class="flex justify-between items-center">
             <h2 class="font-bold text-2xl">游戏设置</h2>
+            <UButton icon="i-lucide:x" color="gray" @click="open = false"></UButton>
           </div>
         </template>
 
@@ -25,7 +26,7 @@
             <div class="flex gap-10">
               <label>
                 <span>选择截图机型:</span>
-                <USelectMenu
+                <USelect
                   class="w-64"
                   v-model="settingStore.model"
                   :options="SUPPORTED_MODELS"
@@ -71,9 +72,9 @@
 
 <script setup lang="ts">
 import useGridParser from '~/composables/useGridParser';
+import { SUPPORTED_MODELS } from '~/config';
 import { useGridStore } from '~/stores/grid';
 import { useSettingStore } from '~/stores/setting';
-import { SUPPORTED_MODELS } from '~/config';
 
 const { loading, phase, parse: parseBoard } = useGridParser();
 const settingStore = useSettingStore();
