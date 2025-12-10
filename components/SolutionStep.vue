@@ -8,7 +8,6 @@
       class="absolute right-5 top-5 disabled:bg-gray-400"
       @click="emit('magic')"
     ></UButton>
-    <UButton @click="highlight">调试</UButton>
 
     <div class="flex flex-col gap-5 p-10 pr-20">
       <div v-for="(move, idx) in moves" :key="idx" class="p-3 border rounded-md">
