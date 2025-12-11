@@ -62,9 +62,16 @@ export const useGridStore = defineStore('grid', {
   },
   actions: {
     // 执行【移动】操作
-    execMove(move: EffectiveMove) {
+    async execMove(move: EffectiveMove) {
+      await highlight({ point1: move.tileVector.start, point2: move.tileVector.end }, 500);
+
       const board = new Board(this.grid);
-      this.grid = board.execMove(move);
+      const [grid, movedTileVector] = board.execMove(move);
+      this.grid = grid;
+
+      setTimeout(() => {
+        highlight({ point1: movedTileVector.start, point2: movedTileVector.end }, 200);
+      }, 0);
     },
 
     // 执行【消除】操作

@@ -472,8 +472,7 @@ export class Board {
   // 执行【移动】操作
   execMove(move: EffectiveMove) {
     const { tileVector: effectiveMoveTileVector, direction, distance } = move;
-    const [board] = this.slide(effectiveMoveTileVector, direction, distance);
-    return board;
+    return this.slide(effectiveMoveTileVector, direction, distance);
   }
 
   // 执行【消除】操作
