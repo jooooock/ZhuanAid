@@ -11,28 +11,31 @@ export interface Coordinate {
   c: number;
 }
 
-export interface Eliminate {
+export interface EliminateBlock {
   point1: Coordinate;
   point2: Coordinate;
   value: number;
 }
 
-export interface TileGroup {
+export interface TileVector {
   start: Coordinate;
   end: Coordinate;
-}
-
-export interface DirectedTileGroup extends TileGroup {
   direction: Direction;
 }
 
-export interface Move {
+export interface MaximumMove {
   direction: Direction;
   distance: number;
-  target: DirectedTileGroup;
+  tileVector: TileVector;
 }
 
-export interface EffectiveMove extends Move, Eliminate {}
+export interface EffectiveMove extends MaximumMove {
+  eliminate: EliminateBlock;
+}
+
+export interface EliminatePointPosition extends Coordinate {
+  offset: number;
+}
 
 export interface HighLightArea {
   point1: Coordinate;

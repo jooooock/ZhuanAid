@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia';
-import type { EffectiveMove, Eliminate, Move } from '~/types/board';
+import type { EffectiveMove, EliminateBlock, MaximumMove } from '~/types/board';
 import { Board } from '~/utils/Board';
 import { highlight } from '~/utils/helper';
+
+/**
+ * 生成 14x10 的空棋盘
+ * Array.from({ length: 14 }).map((_, i) => Array.from({ length: 10 }).fill(0));
+ */
 
 interface GridState {
   grid: number[][];
@@ -10,10 +15,6 @@ interface GridState {
 
 export const useGridStore = defineStore('grid', {
   state: (): GridState => ({
-    /**
-     * 生成 14x10 的空棋盘
-     * Array.from({ length: 14 }).map((_, i) => Array.from({ length: 10 }).fill(0));
-     */
     grid: [
       [31, 22, 0, 0, 10, 27, 0, 0, 0, 16],
       [26, 13, 0, 0, 0, 0, 0, 0, 0, 18],
@@ -33,46 +34,41 @@ export const useGridStore = defineStore('grid', {
     eliminating: false,
   }),
   getters: {
+    // 棋盘行数
     rows(): number {
       return this.grid.length;
     },
+    // 棋盘列数
     cols(): number {
       return this.grid[0].length;
     },
+
+    // 棋盘是否为空，为空表示全部格子已消除
     gridIsEmpty(): boolean {
-      for (const row of this.grid) {
-        for (const cell of row) {
-          if (cell !== 0) {
-            return false;
-          }
-        }
-      }
-      return true;
+      return new Board(this.grid).isSuccess();
     },
-    eliminates(): Eliminate[] {
+
+    // 所有可消除的块
+    eliminates(): EliminateBlock[] {
       const board = new Board(this.grid);
-      return board.findAllEliminate();
+      return board.findAllEliminateBlock();
     },
+
+    // 所有可进行消除的移动操作
     moves(): EffectiveMove[] {
       const board = new Board(this.grid);
-      const moves = board.findAllPossibleMoves();
-
-      let result: EffectiveMove[] = [];
-      for (const move of moves) {
-        const p = board.evaluate(move);
-        if (p.length > 0) {
-          result.push(...p);
-        }
-      }
-      return board.deduplication(result);
+      return board.findAllEffectiveMoves();
     },
   },
   actions: {
-    execMove(move: Move) {
+    // 执行【移动】操作
+    execMove(move: EffectiveMove) {
       const board = new Board(this.grid);
       this.grid = board.execMove(move);
     },
-    async execEliminate(eliminate: Eliminate) {
+
+    // 执行【消除】操作
+    async execEliminate(eliminate: EliminateBlock) {
       await highlight(eliminate, 200);
 
       const board = new Board(this.grid);
@@ -81,6 +77,8 @@ export const useGridStore = defineStore('grid', {
         this.grid = grid;
       }
     },
+
+    // 执行【全部消除】操作
     async execEliminateAll() {
       this.eliminating = true;
 

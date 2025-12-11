@@ -46,17 +46,17 @@
 
 <script setup lang="ts">
 import { useGridStore } from '~/stores/grid';
-import type { Eliminate, HighLightArea } from '~/types/board';
+import type { EliminateBlock, HighLightArea } from '~/types/board';
 import { highlight } from '~/utils/helper';
 
 const gridStore = useGridStore();
 
-function locateTile(eliminate: Eliminate) {
+function locateTile(eliminate: EliminateBlock) {
   let area: HighLightArea = { point1: eliminate.point1, point2: eliminate.point2 };
   highlight(area);
 }
 
-function execEliminate(eliminate: Eliminate) {
+function execEliminate(eliminate: EliminateBlock) {
   gridStore.execEliminate(eliminate);
 }
 function execEliminateAll() {

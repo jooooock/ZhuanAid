@@ -16,26 +16,29 @@
 
         <div class="flex items-start gap-5">
           <div class="space-y-1">
-            <p class="flex items-center">
-              <span class="mr-2">方块坐标:</span>
-              <code>{{ formatGroupTarget(move.target) }}</code>
-              <UButton icon="i-lucide:locate-fixed" @click="locateTile(move)" color="gray" variant="ghost"></UButton>
-            </p>
             <p>
               <span class="mr-2">消除:</span>
-              <img :src="'/icons/' + move.value + '.png'" class="inline-block size-10" alt="" />
+              <img :src="'/icons/' + move.eliminate.value + '.png'" class="inline-block size-10" alt="" />
               <code class="text-gray-400 text-sm">
-                [({{ move.point1.r }},{{ move.point1.c }}), ({{ move.point2.r }},{{ move.point2.c }})]
+                [(R{{ move.eliminate.point1.r + 1 }},C{{ move.eliminate.point1.c + 1 }}), (R{{
+                  move.eliminate.point2.r + 1
+                }},C{{ move.eliminate.point2.c + 1 }})]
               </code>
             </p>
+            <p class="flex items-center">
+              <span class="mr-2">方块坐标:</span>
+              <code>{{ formatGroupTarget(move.tileVector) }}</code>
+              <UButton icon="i-lucide:locate-fixed" @click="locateTile(move)" color="gray" variant="ghost"></UButton>
+            </p>
+            <p class="flex items-center">
+              <span class="mr-2">移动方向:</span>
+              <UIcon
+                :name="'i-heroicons:arrow-' + move.direction.name.toLowerCase() + '-circle-16-solid'"
+                class="text-green-500 size-6"
+              />
+              <span class="font-medium font-mono text-xl text-green-500">{{ move.distance }}</span>
+            </p>
           </div>
-          <p class="flex items-center gap-3">
-            <UIcon
-              :name="'i-heroicons:arrow-' + move.direction.name.toLowerCase() + '-circle-16-solid'"
-              class="text-green-500 size-6"
-            />
-            <span class="font-medium font-mono text-xl text-green-500">{{ move.distance }}</span>
-          </p>
         </div>
       </div>
     </section>
@@ -44,12 +47,12 @@
 
 <script setup lang="ts">
 import { useGridStore } from '~/stores/grid';
-import type { DirectedTileGroup, EffectiveMove, HighLightArea } from '~/types/board';
+import type { EffectiveMove, HighLightArea, TileVector } from '~/types/board';
 import { highlight } from '~/utils/helper';
 
 const gridStore = useGridStore();
 
-function formatGroupTarget(block: DirectedTileGroup) {
+function formatGroupTarget(block: TileVector) {
   let target = '';
   const { start, end } = block;
   if (start.r === end.r && start.c === end.c) {
@@ -71,7 +74,7 @@ function formatGroupTarget(block: DirectedTileGroup) {
 }
 
 function locateTile(move: EffectiveMove) {
-  const target = toRaw(move.target);
+  const target = toRaw(move.tileVector);
   let area: HighLightArea = { point1: target.start, point2: target.end };
   highlight(area);
 }
