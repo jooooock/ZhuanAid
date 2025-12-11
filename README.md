@@ -3,4 +3,4 @@
 
 ## Demo
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=115701050314375&bvid=BV1E3mGBnEKr&cid=34667890112&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+[【《砖了个砖》游戏辅助】(B站)](https://www.bilibili.com/video/BV1E3mGBnEKr/?share_source=copy_web&vd_source=e800d3dbaa32876e97ac11a3166a4641) 
