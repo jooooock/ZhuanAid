@@ -5,13 +5,13 @@
         <template #header>
           <div class="flex justify-between items-center">
             <h2 class="font-bold text-2xl">游戏设置</h2>
-            <UButton icon="i-lucide:x" color="gray" @click="open = false"></UButton>
+            <UButton icon="i-lucide:x" color="gray" @click="open = false" variant="ghost"></UButton>
           </div>
         </template>
 
         <div class="h-[calc(100vh-121px)] overflow-y-scroll">
           <div class="space-y-3 my-3 border rounded-md p-3">
-            <h2 class="text-xl text-fuchsia-500">加载棋盘数据</h2>
+            <h2 class="text-xl text-sky-500 font-medium">加载棋盘数据</h2>
             <canvas id="canvas" class="hidden"></canvas>
             <div class="flex gap-10">
               <label>
@@ -49,14 +49,20 @@
               </label>
             </div>
             <div class="flex gap-10">
-              <UButton @click="processBoard" :loading="loading" :disabled="!file" class="disabled:bg-gray-400">
+              <UButton
+                @click="processBoard"
+                :loading="loading"
+                :disabled="!file"
+                color="sky"
+                class="disabled:bg-gray-400"
+              >
                 {{ phase || '重置棋盘' }}
               </UButton>
             </div>
           </div>
 
           <div class="space-y-3 my-3 border rounded-md p-3">
-            <h2 class="text-xl text-fuchsia-500">显示设置</h2>
+            <h2 class="text-xl text-sky-500 font-medium">显示设置</h2>
             <div class="flex flex-col gap-3">
               <UCheckbox v-model="settingStore.showRowColNumber" label="显示行列号" />
               <UCheckbox v-model="settingStore.showCellValue" label="显示网格值" />

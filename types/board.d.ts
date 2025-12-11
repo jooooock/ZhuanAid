@@ -34,7 +34,7 @@ export interface Move {
 
 export interface EffectiveMove extends Move, Eliminate {}
 
-export interface TileArea {
-  start: Coordinate;
-  end: Coordinate;
+export interface HighLightArea {
+  point1: Coordinate;
+  point2: Coordinate;
 }

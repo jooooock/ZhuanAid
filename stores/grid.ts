@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import type { EffectiveMove, Eliminate, Move } from '~/types/board';
 import { Board } from '~/utils/Board';
+import { highlight } from '~/utils/helper';
 
 interface GridState {
   grid: number[][];
+  eliminating: boolean;
 }
 
 export const useGridStore = defineStore('grid', {
@@ -28,6 +30,7 @@ export const useGridStore = defineStore('grid', {
       [14, 8, 16, 0, 0, 0, 0, 38, 23, 0],
       [9, 35, 19, 29, 17, 0, 27, 0, 0, 0],
     ],
+    eliminating: false,
   }),
   getters: {
     rows(): number {
@@ -69,12 +72,28 @@ export const useGridStore = defineStore('grid', {
       const board = new Board(this.grid);
       this.grid = board.execMove(move);
     },
-    execEliminate(eliminate: Eliminate) {
+    async execEliminate(eliminate: Eliminate) {
+      await highlight(eliminate, 200);
+
       const board = new Board(this.grid);
       const grid = board.execEliminate(eliminate);
       if (grid) {
         this.grid = grid;
       }
+    },
+    async execEliminateAll() {
+      this.eliminating = true;
+
+      while (true) {
+        for (const eliminate of this.eliminates) {
+          await this.execEliminate(eliminate);
+        }
+
+        if (this.eliminates.length === 0) {
+          break;
+        }
+      }
+      this.eliminating = false;
     },
   },
 });

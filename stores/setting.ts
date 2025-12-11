@@ -20,7 +20,7 @@ export const useSettingStore = defineStore('setting', {
   state: (): Setting => ({
     rows: 14,
     cols: 10,
-    showRowColNumber: false,
+    showRowColNumber: true,
     showCellValue: false,
     model: 'iphone-11-pro',
   }),

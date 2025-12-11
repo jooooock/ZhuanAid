@@ -1,6 +1,6 @@
 <template>
   <div class="border my-3 p-3 rounded-md">
-    <h2 class="text-xl mb-3 text-fuchsia-500">素材库</h2>
+    <h2 class="text-xl mb-3 text-sky-500 font-medium">素材库</h2>
     <div class="flex flex-wrap gap-1">
       <div v-for="i in total" class="flex flex-col items-center">
         <img

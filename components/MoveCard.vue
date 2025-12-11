@@ -12,12 +12,14 @@
     <section class="space-y-3">
       <div v-for="(move, idx) in gridStore.moves" :key="idx" class="relative p-3 border rounded-md">
         <code class="absolute right-2 top-2 text-sm text-gray-500">#{{ idx + 1 }}</code>
+        <UButton class="absolute top-5 right-10" icon="i-lucide:zap" @click="execMove(move)" color="sky">移动</UButton>
 
         <div class="flex items-start gap-5">
           <div class="space-y-1">
             <p class="flex items-center">
               <span class="mr-2">方块坐标:</span>
               <code>{{ formatGroupTarget(move.target) }}</code>
+              <UButton icon="i-lucide:locate-fixed" @click="locateTile(move)" color="gray" variant="ghost"></UButton>
             </p>
             <p>
               <span class="mr-2">消除:</span>
@@ -25,33 +27,6 @@
               <code class="text-gray-400 text-sm">
                 [({{ move.point1.r }},{{ move.point1.c }}), ({{ move.point2.r }},{{ move.point2.c }})]
               </code>
-            </p>
-            <p class="flex items-center">
-              <span class="mr-2">动作:</span>
-              <UTooltip
-                text="定位"
-                :popper="{ placement: 'top', arrow: true }"
-                :ui="{
-                  background: 'bg-black',
-                  color: 'text-white',
-                  ring: 'ring-black',
-                  arrow: { background: 'before:bg-black' },
-                }"
-              >
-                <UButton icon="i-lucide:locate-fixed" @click="locateTile(move)" color="gray" variant="ghost"></UButton>
-              </UTooltip>
-              <UTooltip
-                text="执行"
-                :popper="{ placement: 'top', arrow: true }"
-                :ui="{
-                  background: 'bg-black',
-                  color: 'text-white',
-                  ring: 'ring-black',
-                  arrow: { background: 'before:bg-black' },
-                }"
-              >
-                <UButton icon="i-lucide:zap" @click="execMove(move)" color="gray" variant="ghost"></UButton>
-              </UTooltip>
             </p>
           </div>
           <p class="flex items-center gap-3">
@@ -69,7 +44,7 @@
 
 <script setup lang="ts">
 import { useGridStore } from '~/stores/grid';
-import type { DirectedTileGroup, EffectiveMove, TileArea } from '~/types/board';
+import type { DirectedTileGroup, EffectiveMove, HighLightArea } from '~/types/board';
 import { highlight } from '~/utils/helper';
 
 const gridStore = useGridStore();
@@ -97,7 +72,7 @@ function formatGroupTarget(block: DirectedTileGroup) {
 
 function locateTile(move: EffectiveMove) {
   const target = toRaw(move.target);
-  let area: TileArea = { start: target.start, end: target.end };
+  let area: HighLightArea = { point1: target.start, point2: target.end };
   highlight(area);
 }
 

@@ -38,7 +38,7 @@
               </code>
             </p>
             <p class="flex items-center">
-              坐标: <code>{{ formatGroupTarget(move.group) }}</code>
+              坐标: <code>{{ formatGroupTarget(move.target) }}</code>
               <UIcon
                 @click="locateGroup(move)"
                 name="i-lucide:locate-fixed"
@@ -47,7 +47,7 @@
             </p>
             <p class="flex items-center gap-3">
               <UIcon
-                :name="'i-heroicons:arrow-' + move.dir.name.toLowerCase() + '-circle-16-solid'"
+                :name="'i-heroicons:arrow-' + move.direction.name.toLowerCase() + '-circle-16-solid'"
                 class="text-green-500 size-10"
               />
               <span class="font-bold font-mono text-3xl text-green-500">{{ move.distance }}</span>

@@ -1,5 +1,5 @@
 // 余弦相似度
-import type { TileArea } from '~/types/board';
+import type { HighLightArea } from '~/types/board';
 
 export function cosineSimilarity(a: number[], b: number[]) {
   const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
@@ -75,31 +75,33 @@ export function cropImage(file: File, x1: number, y1: number, x2: number, y2: nu
   });
 }
 
-function tileInRange(tile: HTMLElement, area: TileArea): boolean {
+function tileInRange(tile: HTMLElement, area: HighLightArea): boolean {
   const r = +tile.dataset.r!;
   const c = +tile.dataset.c!;
 
   // 计算矩形的边界
-  const minR = Math.min(area.start.r, area.end.r);
-  const maxR = Math.max(area.start.r, area.end.r);
-  const minC = Math.min(area.start.c, area.end.c);
-  const maxC = Math.max(area.start.c, area.end.c);
+  const minR = Math.min(area.point1.r, area.point2.r);
+  const maxR = Math.max(area.point1.r, area.point2.r);
+  const minC = Math.min(area.point1.c, area.point2.c);
+  const maxC = Math.max(area.point1.c, area.point2.c);
 
   return r >= minR && r <= maxR && c >= minC && c <= maxC;
 }
 
 // 高亮棋盘上的指定区域
-export function highlight(area: TileArea) {
-  console.info('高亮区域: ', area);
-  const tiles = document.querySelectorAll<HTMLElement>('.tile');
-  for (const tile of tiles) {
-    if (tileInRange(tile, area)) {
-      tile.classList.add('animate-highlight');
-      setTimeout(() => {
-        tile.classList.remove('animate-highlight');
-      }, 1000);
+export function highlight(area: HighLightArea, duration = 1000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const tiles = document.querySelectorAll<HTMLElement>('.tile');
+    for (const tile of tiles) {
+      if (tileInRange(tile, area)) {
+        tile.classList.add('animate-highlight');
+        setTimeout(() => {
+          tile.classList.remove('animate-highlight');
+          resolve();
+        }, duration);
+      }
     }
-  }
+  });
 }
 
 // 识别的棋盘数据是否有效

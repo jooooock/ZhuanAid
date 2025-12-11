@@ -39,6 +39,10 @@ export class Board {
     return this.grid[point.r][point.c];
   }
 
+  formatPoint(point: Coordinate): string {
+    return `坐标:(R${point.r + 1},C${point.c + 1}),值:${this.getValue(point)}`;
+  }
+
   // 查询指定坐标是否在棋盘内
   inBoard(point: Coordinate) {
     return point.r >= 0 && point.r < this.rows && point.c >= 0 && point.c < this.cols;
@@ -296,7 +300,9 @@ export class Board {
   // 消除
   eliminate(point1: Coordinate, point2: Coordinate) {
     if (!this.isEqual(point1, point2)) {
-      console.warn('执行消除时发现格子内容并不相等');
+      console.warn(
+        `执行消除时发现格子内容并不相等, 分别是[${this.formatPoint(point1)}] 和 [${this.formatPoint(point2)}]`
+      );
       return;
     }
 

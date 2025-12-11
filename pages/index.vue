@@ -4,9 +4,16 @@
       <CheckerBoard />
       <Solution />
     </div>
+    <!--    <div class="animate-highlight size-20 bg-green-500 fixed bottom-0 right-0 z-50"></div>-->
 
     <!-- 打开设置 -->
-    <UButton icon="i-lucide:settings-2" class="fixed right-5 top-5" color="gray" @click="showSettings = true"></UButton>
+    <UButton
+      icon="i-lucide:sliders-horizontal"
+      class="fixed right-5 top-5"
+      color="gray"
+      variant="ghost"
+      @click="showSettings = true"
+    ></UButton>
     <Settings v-model:open="showSettings" />
   </div>
 </template>
