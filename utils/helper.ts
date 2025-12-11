@@ -1,6 +1,6 @@
-// 余弦相似度
 import type { HighLightArea } from '~/types/board';
 
+// 余弦相似度
 export function cosineSimilarity(a: number[], b: number[]) {
   const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
   const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));

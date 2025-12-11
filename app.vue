@@ -6,6 +6,9 @@
 
     <UNotifications />
     <UModals />
+
+    <!-- 用于图片识别的 canvas 元素需要放在全局 -->
+    <canvas id="canvas" class="hidden"></canvas>
   </div>
 </template>
 

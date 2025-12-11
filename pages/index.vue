@@ -4,17 +4,9 @@
       <CheckerBoard />
       <Solution />
     </div>
-    <!--    <div class="animate-highlight size-20 bg-green-500 fixed bottom-0 right-0 z-50"></div>-->
+    <!--    <div class="animate-highlight size-20 bg-sky-500 fixed bottom-0 right-0 z-50"></div>-->
 
-    <!-- 打开设置 -->
-    <UButton
-      icon="i-lucide:sliders-horizontal"
-      class="fixed right-5 top-5"
-      color="gray"
-      variant="ghost"
-      @click="showSettings = true"
-    ></UButton>
-    <Settings v-model:open="showSettings" />
+    <Settings />
   </div>
 </template>
 
@@ -26,6 +18,4 @@ import { websiteName } from '~/config';
 useHead({
   title: websiteName,
 });
-
-const showSettings = ref(false);
 </script>

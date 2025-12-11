@@ -54,8 +54,6 @@ interface BoardParseOptions {
 
 // 解析棋盘
 async function parseBoard({ rows, cols, file }: BoardParseOptions, phase: Ref<string>) {
-  console.log(rows, cols, file);
-
   // 加载原型（只需一次）
   if (prototypes.length === 0) {
     await loadPrototypes(phase);
@@ -154,7 +152,7 @@ export default () => {
   async function parse(file: File) {
     const targetModel = SUPPORTED_MODELS.find(model => model.id === settingStore.model);
     if (!targetModel) {
-      console.warn('未找到指定的手机型号');
+      console.warn(`未找到指定的手机型号: ${settingStore.model}`);
       return null;
     }
 

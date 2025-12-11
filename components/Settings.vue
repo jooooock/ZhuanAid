@@ -1,5 +1,14 @@
 <template>
   <div>
+    <!-- 打开设置 -->
+    <UButton
+      icon="i-lucide:sliders-horizontal"
+      class="fixed right-5 top-5"
+      color="gray"
+      variant="ghost"
+      @click="open = true"
+    ></UButton>
+
     <USlideover v-model="open" :ui="{ width: 'max-w-[500px]', overlay: { background: 'bg-black/60' } }">
       <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
         <template #header>
@@ -12,7 +21,7 @@
         <div class="h-[calc(100vh-121px)] overflow-y-scroll">
           <div class="space-y-3 my-3 border rounded-md p-3">
             <h2 class="text-xl text-sky-500 font-medium">加载棋盘数据</h2>
-            <canvas id="canvas" class="hidden"></canvas>
+
             <div class="flex gap-10">
               <label>
                 <span class="mr-2">棋盘行数:</span>
@@ -23,6 +32,7 @@
                 <UInput v-model="settingStore.cols" type="number" min="1" class="w-20 inline-block" />
               </label>
             </div>
+
             <div class="flex gap-10">
               <label>
                 <span>选择截图机型:</span>
@@ -35,6 +45,7 @@
                 />
               </label>
             </div>
+
             <div class="flex gap-10">
               <label>
                 <span>选择棋盘截图文件:</span>
@@ -48,6 +59,7 @@
                 />
               </label>
             </div>
+
             <div class="flex gap-10">
               <UButton
                 @click="processBoard"
@@ -89,8 +101,8 @@ const toast = toastFactory();
 const { loading, phase, parse: parseBoard } = useGridParser();
 const settingStore = useSettingStore();
 const gridStore = useGridStore();
-const open = defineModel<boolean>('open', { default: false });
 
+const open = ref(false);
 const file = ref<File | null>(null);
 
 function handleFileChange(files: FileList) {
@@ -104,7 +116,7 @@ function handleFileChange(files: FileList) {
 
 async function processBoard() {
   const grid = await parseBoard(file.value!);
-  console.log(grid);
+  console.log('提取的棋盘数据为:', grid);
   if (gridIsValid(grid)) {
     toast.success('棋盘提取成功', '现在可以开始了。');
     gridStore.grid = grid!;
