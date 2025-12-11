@@ -102,7 +102,6 @@ function locateTile(move: EffectiveMove) {
 }
 
 function execMove(move: EffectiveMove) {
-  console.log(move);
   gridStore.execMove(move);
 }
 </script>

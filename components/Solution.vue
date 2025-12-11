@@ -8,5 +8,6 @@
 </template>
 
 <script setup lang="ts">
+import EliminateCard from '~/components/EliminateCard.vue';
 import MoveCard from '~/components/MoveCard.vue';
 </script>

@@ -69,5 +69,12 @@ export const useGridStore = defineStore('grid', {
       const board = new Board(this.grid);
       this.grid = board.execMove(move);
     },
+    execEliminate(eliminate: Eliminate) {
+      const board = new Board(this.grid);
+      const grid = board.execEliminate(eliminate);
+      if (grid) {
+        this.grid = grid;
+      }
+    },
   },
 });

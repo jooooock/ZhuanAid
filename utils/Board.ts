@@ -31,6 +31,14 @@ export class Board {
     return new Board(this.grid);
   }
 
+  // 获取格子的值
+  getValue(point: Coordinate): number {
+    if (!this.inBoard(point)) {
+      throw new Error(`指定坐标(${point.r}, ${point.c})不在棋盘上`);
+    }
+    return this.grid[point.r][point.c];
+  }
+
   // 查询指定坐标是否在棋盘内
   inBoard(point: Coordinate) {
     return point.r >= 0 && point.r < this.rows && point.c >= 0 && point.c < this.cols;
@@ -71,10 +79,10 @@ export class Board {
     }
   }
 
-  // 格子内容是否相等
+  // 格子的值是否相等
   isEqual(p1: Coordinate, p2: Coordinate): boolean {
     if (!this.inBoard(p1) || !this.inBoard(p2)) {
-      return false;
+      throw new Error('坐标不在棋盘内');
     }
 
     return this.grid[p1.r][p1.c] === this.grid[p2.r][p2.c];
@@ -285,10 +293,49 @@ export class Board {
     return [board.grid, range];
   }
 
+  // 消除
+  eliminate(point1: Coordinate, point2: Coordinate) {
+    if (!this.isEqual(point1, point2)) {
+      console.warn('执行消除时发现格子内容并不相等');
+      return;
+    }
+
+    if (point1.r === point2.r) {
+      // 在同一行
+      const start = Math.min(point1.c, point2.c);
+      const end = Math.max(point1.c, point2.c);
+      for (let c = start + 1; c < end; c++) {
+        if (!this.isHoleTile({ r: point1.r, c: c })) {
+          return;
+        }
+      }
+    } else if (point1.c === point2.c) {
+      // 在同一列
+      const start = Math.min(point1.r, point2.r);
+      const end = Math.max(point1.r, point2.r);
+      for (let r = start + 1; r < end; r++) {
+        if (!this.isHoleTile({ r: r, c: point1.c })) {
+          return;
+        }
+      }
+    } else {
+      console.warn('执行消除时发现格子不再一条直线上');
+      return;
+    }
+
+    const board = this.clone();
+    board.grid[point1.r][point1.c] = 0;
+    board.grid[point2.r][point2.c] = 0;
+    return board.grid;
+  }
+
   execMove(move: Move) {
     const { target, direction, distance } = move;
     const [board] = this.slide(target, direction, distance);
     return board;
+  }
+  execEliminate(eliminate: Eliminate) {
+    return this.eliminate(eliminate.point1, eliminate.point2);
   }
 
   getGroupPoints(group: DirectedTileGroup) {
