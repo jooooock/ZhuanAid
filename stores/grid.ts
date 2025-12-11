@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia';
+import type { EffectiveMove, Eliminate, Move } from '~/types/board';
+import { Board } from '~/utils/Board';
 
 interface GridState {
   grid: number[][];
@@ -28,6 +30,12 @@ export const useGridStore = defineStore('grid', {
     ],
   }),
   getters: {
+    rows(): number {
+      return this.grid.length;
+    },
+    cols(): number {
+      return this.grid[0].length;
+    },
     gridIsEmpty(): boolean {
       for (const row of this.grid) {
         for (const cell of row) {
@@ -37,6 +45,29 @@ export const useGridStore = defineStore('grid', {
         }
       }
       return true;
+    },
+    eliminates(): Eliminate[] {
+      const board = new Board(this.grid);
+      return board.findAllEliminate();
+    },
+    moves(): EffectiveMove[] {
+      const board = new Board(this.grid);
+      const moves = board.findAllPossibleMoves();
+
+      let result: EffectiveMove[] = [];
+      for (const move of moves) {
+        const p = board.evaluate(move);
+        if (p.length > 0) {
+          result.push(...p);
+        }
+      }
+      return board.deduplication(result);
+    },
+  },
+  actions: {
+    execMove(move: Move) {
+      const board = new Board(this.grid);
+      this.grid = board.execMove(move);
     },
   },
 });

@@ -1,9 +1,9 @@
 <template>
   <div class="w-fit flex flex-col relative border rounded-md shadow-md">
     <!-- 顶部列序号 -->
-    <BoardColNo :cols="cols" position="top" />
+    <BoardColNo :cols="gridStore.cols" position="top" />
 
-    <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="flex">
+    <div v-for="(row, rowIndex) in gridStore.grid" :key="rowIndex" class="flex">
       <!-- 左侧行序号 -->
       <BoardRowNo :index="rowIndex" position="left" />
 
@@ -30,24 +30,18 @@
     </div>
 
     <!-- 底部列序号 -->
-    <BoardColNo :cols="cols" position="bottom" />
+    <BoardColNo :cols="gridStore.cols" position="bottom" />
   </div>
 </template>
 
 <script setup lang="ts">
 import BoardColNo from '~/components/widgets/BoardColNo.vue';
 import BoardRowNo from '~/components/widgets/BoardRowNo.vue';
+import { useGridStore } from '~/stores/grid';
 import { useSettingStore } from '~/stores/setting';
 
-interface BoardProps {
-  grid: number[][];
-}
-
-const props = defineProps<BoardProps>();
-
+const gridStore = useGridStore();
 const settingStore = useSettingStore();
-
-const cols = computed(() => props.grid[0].length);
 
 function cellImageCls(cell: number) {
   return cell === 0 ? '' : 'border border-black';

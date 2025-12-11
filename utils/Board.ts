@@ -285,6 +285,12 @@ export class Board {
     return [board.grid, range];
   }
 
+  execMove(move: Move) {
+    const { target, direction, distance } = move;
+    const [board] = this.slide(target, direction, distance);
+    return board;
+  }
+
   getGroupPoints(group: DirectedTileGroup) {
     const points: Coordinate[] = [];
     points.push({ ...group.start });

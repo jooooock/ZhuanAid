@@ -4,13 +4,13 @@
       <div class="flex justify-between items-center">
         <h2 class="text-2xl">
           <span>立即消除</span>
-          <code class="ml-1 text-sm text-green-500">({{ eliminates.length }})</code>
+          <code class="ml-1 text-sm text-green-500">({{ gridStore.eliminates.length }})</code>
         </h2>
       </div>
     </template>
 
     <section class="space-y-3">
-      <div v-for="(item, idx) in eliminates" :key="idx" class="relative p-3 border rounded-md">
+      <div v-for="(item, idx) in gridStore.eliminates" :key="idx" class="relative p-3 border rounded-md">
         <code class="absolute right-0 top-0 text-xs bg-black/40 p-1 text-white">#{{ idx + 1 }}</code>
         <p>
           <span>消除:</span>
@@ -33,13 +33,11 @@
 </template>
 
 <script setup lang="ts">
-import type { EffectiveMove, Eliminate, TileArea } from '~/types/board';
+import { useGridStore } from '~/stores/grid';
+import type { Eliminate, TileArea } from '~/types/board';
 import { highlight } from '~/utils/helper';
 
-interface Props {
-  eliminates: Eliminate[];
-}
-defineProps<Props>();
+const gridStore = useGridStore();
 
 function locateTile(eliminate: Eliminate) {
   let area: TileArea = { start: eliminate.point1, end: eliminate.point2 };
