@@ -15,7 +15,6 @@
         :class="cellDivCls(cell)"
         :data-r="rowIndex"
         :data-c="colIndex"
-        @click="debug(rowIndex, colIndex)"
       >
         <img :src="'/icons/' + cell + '.png'" class="size-10" :class="cellImageCls(cell)" alt="" />
         <code
@@ -48,7 +47,6 @@ const props = defineProps<BoardProps>();
 
 const settingStore = useSettingStore();
 
-const rows = computed(() => props.grid.length);
 const cols = computed(() => props.grid[0].length);
 
 function cellImageCls(cell: number) {
@@ -56,9 +54,5 @@ function cellImageCls(cell: number) {
 }
 function cellDivCls(cell: number) {
   return cell === 0 ? '' : 'hover:ring-4 hover:cursor-pointer hover:z-10 hover:scale-110';
-}
-
-function debug(r: number, c: number) {
-  console.log(`(${r}, ${c})`);
 }
 </script>

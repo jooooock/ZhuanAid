@@ -11,7 +11,7 @@
 
         <div class="h-[calc(100vh-121px)] overflow-y-scroll">
           <div class="space-y-3 my-3 border rounded-md p-3">
-            <h2 class="text-xl text-fuchsia-500">提取棋盘数据</h2>
+            <h2 class="text-xl text-fuchsia-500">加载棋盘数据</h2>
             <canvas id="canvas" class="hidden"></canvas>
             <div class="flex gap-10">
               <label>
@@ -71,10 +71,14 @@
 </template>
 
 <script setup lang="ts">
+import toastFactory from '~/composables/toast';
 import useGridParser from '~/composables/useGridParser';
 import { SUPPORTED_MODELS } from '~/config';
 import { useGridStore } from '~/stores/grid';
 import { useSettingStore } from '~/stores/setting';
+import { gridIsValid } from '~/utils/helper';
+
+const toast = toastFactory();
 
 const { loading, phase, parse: parseBoard } = useGridParser();
 const settingStore = useSettingStore();
@@ -95,8 +99,11 @@ function handleFileChange(files: FileList) {
 async function processBoard() {
   const grid = await parseBoard(file.value!);
   console.log(grid);
-  if (grid) {
-    gridStore.grid = grid;
+  if (gridIsValid(grid)) {
+    toast.success('棋盘提取成功', '现在可以开始了。');
+    gridStore.grid = grid!;
+  } else {
+    toast.error('棋盘提取失败', '部分图标无法匹配，请确认素材库是否包含全部图标。');
   }
 }
 </script>

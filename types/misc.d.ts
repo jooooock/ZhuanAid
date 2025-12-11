@@ -1,6 +1,8 @@
 export interface PhoneModel {
   id: string;
   name: string;
+  width: number;
+  height: number;
   x1: number;
   y1: number;
   x2: number;

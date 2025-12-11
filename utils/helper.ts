@@ -79,18 +79,42 @@ function tileInRange(tile: HTMLElement, area: TileArea): boolean {
   const r = +tile.dataset.r!;
   const c = +tile.dataset.c!;
 
-  return r >= area.start.r && r <= area.end.r && c >= area.start.c && c <= area.end.c;
+  // 计算矩形的边界
+  const minR = Math.min(area.start.r, area.end.r);
+  const maxR = Math.max(area.start.r, area.end.r);
+  const minC = Math.min(area.start.c, area.end.c);
+  const maxC = Math.max(area.start.c, area.end.c);
+
+  return r >= minR && r <= maxR && c >= minC && c <= maxC;
 }
 
+// 高亮棋盘上的指定区域
 export function highlight(area: TileArea) {
-  console.log(area);
+  console.info('高亮区域: ', area);
   const tiles = document.querySelectorAll<HTMLElement>('.tile');
   for (const tile of tiles) {
     if (tileInRange(tile, area)) {
-      tile.classList.add('animate-skin');
+      tile.classList.add('animate-highlight');
       setTimeout(() => {
-        tile.classList.remove('animate-skin');
+        tile.classList.remove('animate-highlight');
       }, 1000);
     }
   }
+}
+
+// 识别的棋盘数据是否有效
+export function gridIsValid(grid: number[][] | null): boolean {
+  if (!grid) return false;
+
+  // 存在-1表示图标识别识别
+  const rows = grid.length;
+  const cols = grid[0].length;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] === -1) {
+        return false;
+      }
+    }
+  }
+  return true;
 }

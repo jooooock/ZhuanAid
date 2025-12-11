@@ -16,12 +16,12 @@ body {
     scrollbar-width: none; /* Firefox */
 }
 
-@keyframes skin {
+@keyframes highlight {
     50% {
         opacity: 0.1;
     }
 }
 
-.animate-skin {
-    animation: skin 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.animate-highlight {
+    animation: highlight 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
