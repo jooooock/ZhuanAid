@@ -7,6 +7,13 @@
     <!--    <div class="animate-highlight size-20 bg-sky-500 fixed bottom-0 right-0 z-50"></div>-->
 
     <Settings />
+    <UButton
+      icon="i-lucide:sparkles"
+      @click="gridStore.magic()"
+      color="gray"
+      variant="ghost"
+      class="fixed right-5 top-16"
+    ></UButton>
   </div>
 </template>
 
@@ -14,8 +21,11 @@
 import CheckerBoard from '~/components/CheckerBoard.vue';
 import Solution from '~/components/Solution.vue';
 import { websiteName } from '~/config';
+import { useGridStore } from '~/stores/grid';
 
 useHead({
   title: websiteName,
 });
+
+const gridStore = useGridStore();
 </script>

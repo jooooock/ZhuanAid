@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import toastFactory from '~/composables/toast';
 import type { EffectiveMove, EliminateBlock, MaximumMove } from '~/types/board';
 import { Board } from '~/utils/Board';
 import { highlight } from '~/utils/helper';
@@ -62,16 +63,19 @@ export const useGridStore = defineStore('grid', {
   },
   actions: {
     // 执行【移动】操作
-    async execMove(move: EffectiveMove) {
-      await highlight({ point1: move.tileVector.start, point2: move.tileVector.end }, 500);
+    async execMove(move: EffectiveMove): Promise<void> {
+      return new Promise(async resolve => {
+        await highlight({ point1: move.tileVector.start, point2: move.tileVector.end }, 500);
 
-      const board = new Board(this.grid);
-      const [grid, movedTileVector] = board.execMove(move);
-      this.grid = grid;
+        const board = new Board(this.grid);
+        const [grid, movedTileVector] = board.execMove(move);
+        this.grid = grid;
 
-      setTimeout(() => {
-        highlight({ point1: movedTileVector.start, point2: movedTileVector.end }, 200);
-      }, 0);
+        setTimeout(async () => {
+          await highlight({ point1: movedTileVector.start, point2: movedTileVector.end }, 200);
+          resolve();
+        }, 0);
+      });
     },
 
     // 执行【消除】操作
@@ -99,6 +103,32 @@ export const useGridStore = defineStore('grid', {
         }
       }
       this.eliminating = false;
+    },
+
+    async magic() {
+      const toast = toastFactory();
+
+      while (true) {
+        if (this.moves.length === 0 && this.eliminates.length === 0) {
+          if (this.gridIsEmpty) {
+            console.log('成功');
+            toast.success('执行结束', '已成功消除所有格子');
+          } else {
+            console.log('失败');
+            toast.error('执行结束', '出现死局');
+          }
+          break;
+        }
+
+        // 执行【全部消除】
+        await this.execEliminateAll();
+
+        // 执行第一个【移动】
+        const move = this.moves.shift();
+        if (move) {
+          await this.execMove(move);
+        }
+      }
     },
   },
 });
