@@ -78,6 +78,12 @@
             <div class="flex flex-col gap-3">
               <UCheckbox v-model="settingStore.showRowColNumber" label="显示行列号" />
               <UCheckbox v-model="settingStore.showCellValue" label="显示网格值" />
+              <URadioGroup
+                v-model="settingStore.speed"
+                legend="自动走步速度"
+                :options="options"
+                :ui="{ fieldset: 'flex gap-10 flex-1' }"
+              />
             </div>
           </div>
 
@@ -95,6 +101,17 @@ import { useSettingStore } from '~/stores/setting';
 
 const settingStore = useSettingStore();
 const gridStore = useGridStore();
+
+const options = [
+  {
+    value: 'fast',
+    label: '快',
+  },
+  {
+    value: 'slow',
+    label: '慢',
+  },
+];
 
 const open = ref(false);
 const file = ref<File | null>(null);

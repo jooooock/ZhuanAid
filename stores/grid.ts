@@ -113,15 +113,20 @@ export const useGridStore = defineStore('grid', {
 
     // 执行【移动】操作
     async execMove(move: EffectiveMove): Promise<void> {
+      const settingStore = useSettingStore();
+
       return new Promise(async resolve => {
-        await highlight({ point1: move.tileVector.start, point2: move.tileVector.end }, 500);
+        await highlight({ point1: move.tileVector.start, point2: move.tileVector.end }, settingStore.autoPlayDuration);
 
         const board = new Board(this.grid);
         const [grid, movedTileVector] = board.execMove(move);
         this.grid = grid;
 
         setTimeout(async () => {
-          await highlight({ point1: movedTileVector.start, point2: movedTileVector.end }, 200);
+          await highlight(
+            { point1: movedTileVector.start, point2: movedTileVector.end },
+            settingStore.autoPlayDuration
+          );
           resolve();
         }, 0);
       });
@@ -129,7 +134,9 @@ export const useGridStore = defineStore('grid', {
 
     // 执行【消除】操作
     async execEliminate(eliminate: EliminateBlock) {
-      await highlight(eliminate, 200);
+      const settingStore = useSettingStore();
+
+      await highlight(eliminate, settingStore.autoPlayDuration);
 
       const board = new Board(this.grid);
       const grid = board.execEliminate(eliminate);

@@ -12,7 +12,7 @@
       <UIcon name="i-lucide:loader" class="animate-spin" />
       <span>自动运行中，点击停止</span>
     </UButton>
-    <!--    自动执行-->
+    <!-- 自动执行-->
     <UButton
       v-else
       icon="i-lucide:sparkles"

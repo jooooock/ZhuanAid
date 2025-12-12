@@ -14,6 +14,9 @@ interface Setting {
 
   // 手机型号
   model: string;
+
+  // 自动走步速度
+  speed: 'fast' | 'slow';
 }
 
 export const useSettingStore = defineStore('setting', {
@@ -23,5 +26,11 @@ export const useSettingStore = defineStore('setting', {
     showRowColNumber: true,
     showCellValue: false,
     model: 'iphone-11-pro',
+    speed: 'fast',
   }),
+  getters: {
+    autoPlayDuration(): number {
+      return this.speed === 'fast' ? 20 : 300;
+    },
+  },
 });
