@@ -7,7 +7,14 @@
     <!--    <div class="animate-highlight size-20 bg-sky-500 fixed bottom-0 right-0 z-50"></div>-->
 
     <Settings />
+
+    <UButton v-if="gridStore.autoRunning" class="fixed right-5 top-16" @click="gridStore.stop()">
+      <UIcon name="i-lucide:loader" class="animate-spin" />
+      <span>自动运行中，点击停止</span>
+    </UButton>
+    <!--    自动执行-->
     <UButton
+      v-else
       icon="i-lucide:sparkles"
       @click="gridStore.magic()"
       color="gray"

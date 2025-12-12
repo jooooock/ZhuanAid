@@ -1,5 +1,5 @@
 <template>
-  <div class="w-fit flex flex-col relative border rounded-md shadow-md">
+  <div class="relative w-fit flex flex-col border rounded-md shadow-md">
     <!-- 顶部列序号 -->
     <BoardColNo :cols="gridStore.cols" position="top" />
 
@@ -27,6 +27,14 @@
 
       <!-- 右侧行序号 -->
       <BoardRowNo :index="rowIndex" position="right" />
+    </div>
+
+    <div v-if="gridStore.loading" class="absolute z-50 inset-0 flex flex-col justify-center items-center">
+      <img src="/icons/20.png" alt="" class="animate-bounce-1 size-10" />
+      <p class="text-gray-200">
+        <span>棋盘加载中</span>
+        <span v-if="gridStore.phase">({{ gridStore.phase }})</span>
+      </p>
     </div>
 
     <!-- 底部列序号 -->

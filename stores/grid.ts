@@ -1,38 +1,47 @@
 import { defineStore } from 'pinia';
 import toastFactory from '~/composables/toast';
-import type { EffectiveMove, EliminateBlock, MaximumMove } from '~/types/board';
+import { SUPPORTED_MODELS } from '~/config';
+import { useSettingStore } from '~/stores/setting';
+import type { EffectiveMove, EliminateBlock } from '~/types/board';
 import { Board } from '~/utils/Board';
-import { highlight } from '~/utils/helper';
+import { BoardParser } from '~/utils/BoardParser';
+import { cropImage, gridIsValid, highlight } from '~/utils/helper';
 
-/**
- * 生成 14x10 的空棋盘
- * Array.from({ length: 14 }).map((_, i) => Array.from({ length: 10 }).fill(0));
- */
+// 生成 14x10 的空棋盘
+// Array.from({ length: 14 }).map((_, i) => Array.from({ length: 10 }).fill(0));
 
 interface GridState {
+  loading: boolean;
+  phase: string;
   grid: number[][];
   eliminating: boolean;
+  autoRunning: boolean;
+  isStop: boolean;
 }
 
 export const useGridStore = defineStore('grid', {
   state: (): GridState => ({
+    loading: false,
+    phase: '',
     grid: [
-      [31, 22, 0, 0, 10, 27, 0, 0, 0, 16],
-      [26, 13, 0, 0, 0, 0, 0, 0, 0, 18],
-      [33, 12, 17, 11, 0, 6, 0, 0, 11, 38],
-      [7, 14, 0, 21, 0, 0, 0, 0, 23, 34],
-      [8, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [9, 29, 34, 0, 28, 31, 0, 0, 0, 0],
-      [21, 10, 0, 0, 19, 0, 0, 0, 0, 29],
-      [40, 0, 0, 35, 0, 0, 0, 0, 0, 30],
-      [0, 0, 37, 0, 0, 0, 0, 26, 0, 0],
-      [6, 13, 0, 0, 0, 0, 0, 32, 0, 12],
-      [0, 0, 0, 0, 0, 18, 0, 0, 0, 30],
-      [37, 29, 0, 7, 40, 33, 0, 28, 22, 32],
-      [14, 8, 16, 0, 0, 0, 0, 38, 23, 0],
-      [9, 35, 19, 29, 17, 0, 27, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ],
     eliminating: false,
+    autoRunning: false,
+    isStop: false,
   }),
   getters: {
     // 棋盘行数
@@ -62,6 +71,46 @@ export const useGridStore = defineStore('grid', {
     },
   },
   actions: {
+    // 加载棋盘
+    async load(file: File) {
+      const toast = toastFactory();
+      const settingStore = useSettingStore();
+
+      const targetModel = SUPPORTED_MODELS.find(model => model.id === settingStore.model);
+      if (!targetModel) {
+        console.warn(`未找到指定的手机型号: ${settingStore.model}`);
+        toast.warning('棋盘加载失败', `未找到指定的手机型号: ${settingStore.model}`);
+        return;
+      }
+
+      this.phase = '';
+      const parser = new BoardParser(status => {
+        this.phase = status;
+      });
+
+      try {
+        this.loading = true;
+        this.grid = Array.from({ length: settingStore.rows }).map(
+          () => Array.from({ length: settingStore.cols }).fill(0) as number[]
+        );
+
+        // 裁剪图片
+        const boardAreaFile = await cropImage(file, targetModel.x1, targetModel.y1, targetModel.x2, targetModel.y2);
+        const grid = await parser.parse(boardAreaFile, settingStore.rows, settingStore.cols);
+        console.log('提取的棋盘数据为:', grid);
+        if (gridIsValid(grid)) {
+          toast.success('棋盘加载成功', '现在可以开始验证了');
+          this.grid = grid;
+        } else {
+          toast.error('棋盘加载失败', '部分图标无法匹配，请确认素材库是否包含全部图标。');
+        }
+      } catch (error: any) {
+        toast.error('棋盘加载失败', error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
     // 执行【移动】操作
     async execMove(move: EffectiveMove): Promise<void> {
       return new Promise(async resolve => {
@@ -105,10 +154,16 @@ export const useGridStore = defineStore('grid', {
       this.eliminating = false;
     },
 
+    // 自动执行
     async magic() {
       const toast = toastFactory();
+      this.autoRunning = true;
 
       while (true) {
+        if (this.isStop) {
+          break;
+        }
+
         if (this.moves.length === 0 && this.eliminates.length === 0) {
           if (this.gridIsEmpty) {
             console.log('成功');
@@ -129,6 +184,13 @@ export const useGridStore = defineStore('grid', {
           await this.execMove(move);
         }
       }
+
+      this.autoRunning = false;
+      this.isStop = false;
+    },
+
+    stop() {
+      this.isStop = true;
     },
   },
 });

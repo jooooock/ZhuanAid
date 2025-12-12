@@ -63,12 +63,12 @@
             <div class="flex gap-10">
               <UButton
                 @click="processBoard"
-                :loading="loading"
+                :loading="gridStore.loading"
                 :disabled="!file"
                 color="sky"
                 class="disabled:bg-gray-400"
               >
-                {{ phase || '重置棋盘' }}
+                {{ gridStore.phase || '重置棋盘' }}
               </UButton>
             </div>
           </div>
@@ -89,16 +89,10 @@
 </template>
 
 <script setup lang="ts">
-import toastFactory from '~/composables/toast';
-import useGridParser from '~/composables/useGridParser';
 import { SUPPORTED_MODELS } from '~/config';
 import { useGridStore } from '~/stores/grid';
 import { useSettingStore } from '~/stores/setting';
-import { gridIsValid } from '~/utils/helper';
 
-const toast = toastFactory();
-
-const { loading, phase, parse: parseBoard } = useGridParser();
 const settingStore = useSettingStore();
 const gridStore = useGridStore();
 
@@ -115,13 +109,7 @@ function handleFileChange(files: FileList) {
 }
 
 async function processBoard() {
-  const grid = await parseBoard(file.value!);
-  console.log('提取的棋盘数据为:', grid);
-  if (gridIsValid(grid)) {
-    toast.success('棋盘提取成功', '现在可以开始了。');
-    gridStore.grid = grid!;
-  } else {
-    toast.error('棋盘提取失败', '部分图标无法匹配，请确认素材库是否包含全部图标。');
-  }
+  open.value = false;
+  await gridStore.load(file.value!);
 }
 </script>
