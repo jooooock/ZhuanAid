@@ -14,9 +14,17 @@ interface GridState {
   loading: boolean;
   phase: string;
   grid: number[][];
+  backupGrid: number[][];
+  path: number[];
   eliminating: boolean;
   autoRunning: boolean;
   isStop: boolean;
+}
+
+interface Trip {
+  index: number;
+  count: number;
+  choose: number;
 }
 
 export const useGridStore = defineStore('grid', {
@@ -39,6 +47,23 @@ export const useGridStore = defineStore('grid', {
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ],
+    backupGrid: [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+    path: [],
     eliminating: false,
     autoRunning: false,
     isStop: false,
@@ -53,8 +78,8 @@ export const useGridStore = defineStore('grid', {
       return this.grid[0].length;
     },
 
-    // 棋盘是否为空，为空表示全部格子已消除
-    gridIsEmpty(): boolean {
+    // 棋盘是否已全部消除
+    isSuccess(): boolean {
       return new Board(this.grid).isSuccess();
     },
 
@@ -166,18 +191,20 @@ export const useGridStore = defineStore('grid', {
       const toast = toastFactory();
       this.autoRunning = true;
 
+      // 备份棋盘状态
+      this.backupGrid = this.grid.map(row => [...row]);
+
+      const path: Trip[] = [];
+      let index = 0;
       while (true) {
         if (this.isStop) {
           break;
         }
 
         if (this.moves.length === 0 && this.eliminates.length === 0) {
-          if (this.gridIsEmpty) {
+          if (this.isSuccess) {
             console.log('成功');
             toast.success('执行结束', '已成功消除所有格子');
-          } else {
-            console.log('失败');
-            toast.error('执行结束', '出现死局');
           }
           break;
         }
@@ -185,15 +212,89 @@ export const useGridStore = defineStore('grid', {
         // 执行【全部消除】
         await this.execEliminateAll();
 
-        // 执行第一个【移动】
-        const move = this.moves.shift();
-        if (move) {
+        if (this.moves.length > 0) {
+          // 执行第一个【移动】
+          path.push({ index: index, count: this.moves.length, choose: 0 });
+          const move = this.moves[0];
           await this.execMove(move);
+
+          index += 1;
+        }
+      }
+
+      if (!this.isStop && !this.isSuccess) {
+        console.log('执行结束: 出现死局, 继续尝试其他可能');
+        let max = 20;
+
+        let lastIndex = path.at(-1)!.index;
+        let lastChoose = path.at(-1)!.choose;
+        while (true) {
+          const nuxtIndexChoose = this.findNextIndexChoose(path, lastIndex, lastChoose)!;
+          if (!nuxtIndexChoose) {
+            break;
+          }
+          lastIndex = nuxtIndexChoose[0];
+          lastChoose = nuxtIndexChoose[1];
+          const success = await this.tryAgain(lastIndex, lastChoose);
+          if (success || max-- === 0) {
+            break;
+          }
         }
       }
 
       this.autoRunning = false;
       this.isStop = false;
+    },
+
+    async tryAgain(targetIndex: number, targetChoose: number): Promise<boolean> {
+      const toast = toastFactory();
+
+      // 恢复棋盘状态
+      this.grid = this.backupGrid.map(row => [...row]);
+
+      let index = 0;
+      while (true) {
+        if (this.isStop) {
+          break;
+        }
+
+        if (this.moves.length === 0 && this.eliminates.length === 0) {
+          if (this.isSuccess) {
+            console.log('成功');
+            toast.success('执行结束', '已成功消除所有格子');
+            console.log(`第${targetIndex}步选择序号${targetChoose + 1}`);
+          }
+          break;
+        }
+
+        // 执行【全部消除】
+        await this.execEliminateAll();
+
+        if (this.moves.length > 0) {
+          // 执行第一个【移动】
+          let choose = 0;
+          if (index === targetIndex) {
+            choose = targetChoose;
+          }
+          const move = this.moves[choose];
+          await this.execMove(move);
+
+          index += 1;
+        }
+      }
+
+      return this.isSuccess;
+    },
+
+    findNextIndexChoose(path: Trip[], lastIndex: number, lastChoose: number): [number, number] | null {
+      const lastTrip = path[lastIndex]!;
+      if (lastChoose < lastTrip.count - 1) {
+        return [lastIndex, lastChoose + 1];
+      } else if (lastIndex > 0) {
+        return this.findNextIndexChoose(path, --lastIndex, 0);
+      } else {
+        return null;
+      }
     },
 
     stop() {
