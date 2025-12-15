@@ -19,10 +19,10 @@ interface GridState {
   eliminating: boolean;
   autoRunning: boolean;
   isStop: boolean;
+  step: number;
 }
 
 interface Trip {
-  index: number;
   count: number;
   choose: number;
 }
@@ -67,6 +67,7 @@ export const useGridStore = defineStore('grid', {
     eliminating: false,
     autoRunning: false,
     isStop: false,
+    step: 1,
   }),
   getters: {
     // 棋盘行数
@@ -153,6 +154,7 @@ export const useGridStore = defineStore('grid', {
             settingStore.autoPlayDuration
           );
           resolve();
+          this.step++;
         }, 0);
       });
     },
@@ -214,7 +216,7 @@ export const useGridStore = defineStore('grid', {
 
         if (this.moves.length > 0) {
           // 执行第一个【移动】
-          path.push({ index: index, count: this.moves.length, choose: 0 });
+          path.push({ count: this.moves.length, choose: 0 });
           const move = this.moves[0];
           await this.execMove(move);
 
@@ -224,19 +226,14 @@ export const useGridStore = defineStore('grid', {
 
       if (!this.isStop && !this.isSuccess) {
         console.log('执行结束: 出现死局, 继续尝试其他可能');
-        let max = 20;
+        let max = 10;
 
-        let lastIndex = path.at(-1)!.index;
-        let lastChoose = path.at(-1)!.choose;
-        while (true) {
-          const nuxtIndexChoose = this.findNextIndexChoose(path, lastIndex, lastChoose)!;
-          if (!nuxtIndexChoose) {
+        for (const current of generateCombinations(path.map(i => i.count - 1))) {
+          await this.tryAgain(current);
+          if (this.isSuccess) {
             break;
           }
-          lastIndex = nuxtIndexChoose[0];
-          lastChoose = nuxtIndexChoose[1];
-          const success = await this.tryAgain(lastIndex, lastChoose);
-          if (success || max-- === 0) {
+          if (max-- === 0) {
             break;
           }
         }
@@ -246,7 +243,7 @@ export const useGridStore = defineStore('grid', {
       this.isStop = false;
     },
 
-    async tryAgain(targetIndex: number, targetChoose: number): Promise<boolean> {
+    async tryAgain(executePath: number[]): Promise<boolean> {
       const toast = toastFactory();
 
       // 恢复棋盘状态
@@ -262,7 +259,7 @@ export const useGridStore = defineStore('grid', {
           if (this.isSuccess) {
             console.log('成功');
             toast.success('执行结束', '已成功消除所有格子');
-            console.log(`第${targetIndex}步选择序号${targetChoose + 1}`);
+            console.log(`执行路径: ${executePath}`);
           }
           break;
         }
@@ -273,8 +270,8 @@ export const useGridStore = defineStore('grid', {
         if (this.moves.length > 0) {
           // 执行第一个【移动】
           let choose = 0;
-          if (index === targetIndex) {
-            choose = targetChoose;
+          if (typeof executePath[index] === 'number' && executePath[index] < this.moves.length) {
+            choose = executePath[index];
           }
           const move = this.moves[choose];
           await this.execMove(move);
@@ -286,19 +283,22 @@ export const useGridStore = defineStore('grid', {
       return this.isSuccess;
     },
 
-    findNextIndexChoose(path: Trip[], lastIndex: number, lastChoose: number): [number, number] | null {
-      const lastTrip = path[lastIndex]!;
-      if (lastChoose < lastTrip.count - 1) {
-        return [lastIndex, lastChoose + 1];
-      } else if (lastIndex > 0) {
-        return this.findNextIndexChoose(path, --lastIndex, 0);
-      } else {
-        return null;
-      }
-    },
-
     stop() {
       this.isStop = true;
     },
   },
 });
+
+function* generateCombinations(limits: number[]) {
+  function* recurse(pos: number, current: number[]): Generator<number[]> {
+    if (pos === limits.length) {
+      yield [...current];
+      return;
+    }
+    for (let i = 0; i <= limits[pos]; i++) {
+      current[pos] = i;
+      yield* recurse(pos + 1, current);
+    }
+  }
+  yield* recurse(0, []);
+}

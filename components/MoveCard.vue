@@ -2,9 +2,11 @@
   <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
     <template #header>
       <div class="flex justify-between items-center">
-        <h2 class="text-2xl">
+        <h2 class="text-2xl flex-1 flex items-end">
           <span>移动后消除</span>
           <code class="ml-1 text-sm text-green-500">({{ gridStore.moves.length }})</code>
+          <span class="flex-1"></span>
+          <code class="text-gray-500 text-sm">step:{{ gridStore.step }}</code>
         </h2>
       </div>
     </template>
