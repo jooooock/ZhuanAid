@@ -1,4 +1,4 @@
-name: Upload Screenshot
+name: 上传
 description: 请求支持新的分辨率截图
 body:
   - type: textarea
