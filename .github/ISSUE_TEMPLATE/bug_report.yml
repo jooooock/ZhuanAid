@@ -1,14 +1,14 @@
-name: Bug Report
-description: 提交一个 Bug
+name: 上传游戏截图
+description: 请求支持新的游戏截图
 body:
   - type: textarea
     id: screenshots
     attributes:
-      label: 截图 / Screenshots
+      label: 完整游戏截图 / Screenshots
       description: |
-        **请在此处粘贴截图（必填）**
+        **请在此处粘贴完整游戏截图（必填）**
         直接将图片拖拽或粘贴到此文本框即可上传。
       placeholder: "📎 请在此粘贴或拖拽截图，不填写将不予处理..."
-      value: "<!-- 请删除此行并粘贴截图 -->"
+      value: ""
     validations:
       required: true
