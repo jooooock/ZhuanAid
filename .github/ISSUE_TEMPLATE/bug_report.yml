@@ -1,5 +1,5 @@
-name: Bug Report
-description: 提交一个 Bug
+name: Upload Screenshot
+description: 请求支持新的分辨率截图
 body:
   - type: textarea
     id: screenshots
