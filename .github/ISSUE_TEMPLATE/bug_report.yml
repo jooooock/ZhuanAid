@@ -9,6 +9,6 @@ body:
         **请在此处粘贴游戏截图（必填）**
         直接将图片拖拽或粘贴到此文本框即可上传。
       placeholder: "📎 请在此粘贴或拖拽截图，不填写将不予处理..."
-      value: ""
+      value: "<!-- 请删除此行并粘贴截图 -->"
     validations:
       required: true
